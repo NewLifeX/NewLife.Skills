@@ -104,7 +104,89 @@ var signature = RSAHelper.Sign(data, privateKey, "SHA256");
 bool isValid  = RSAHelper.Verify(data, signature, publicKey, "SHA256");
 ```
 
-### 四、ICryptoTransform 直接转换
+### 四、JWT 令牌（JwtBuilder）
+
+```csharp
+using NewLife.Web;
+
+// ——— 签发 ———
+var issuer = new JwtBuilder
+{
+    Secret  = configuration["Jwt:Secret"],   // 至少 32 字节，从配置读取
+    Expire  = DateTime.Now.AddHours(24),     // 过期时间（exp 声明）
+    Subject = user.Id.ToString(),             // 主体（sub 声明，通常是用户ID）
+    Issuer  = "MyApp",                        // 签发方（iss 声明）
+};
+
+// 附加自定义声明
+issuer["role"] = user.Role;
+issuer["name"] = user.Name;
+
+var token = issuer.Encode(new { });           // payload 中的额外属性可在此传入
+```
+
+```csharp
+// ——— 验证 ———
+var verifier = new JwtBuilder
+{
+    Secret = configuration["Jwt:Secret"],
+};
+
+if (verifier.TryDecode(token, out var message))
+{
+    var userId = verifier.Subject;                // "sub" 声明
+    var role   = (string?)verifier["role"];       // 自定义声明
+    var expire = verifier.Expire;                 // "exp" 声明
+}
+else
+{
+    // message: "JWT格式不正确" / "令牌已过期" / "令牌未生效" / "未设置密钥"
+    return Unauthorized(message);
+}
+```
+
+```csharp
+// ——— 不验证签名，仅解析结构（用于获取算法等元数据）———
+var parts = new JwtBuilder().Parse(token);   // 返回 [header, payload, signature]
+if (parts != null)
+{
+    var builder2 = new JwtBuilder { Secret = GetSecretByAlgorithm(builder2.Algorithm) };
+    builder2.TryDecode(token, out _);
+}
+```
+
+#### RS256（RSA 非对称签发）
+
+```csharp
+// 服务端用私钥签发
+var issuer = new JwtBuilder
+{
+    Algorithm = "RS256",
+    Secret    = rsaPrivateKeyPem,     // PEM 格式私钥
+    Subject   = userId,
+    Expire    = DateTime.Now.AddHours(1),
+};
+var token = issuer.Encode(new { });
+
+// 客户端/验签方用公钥验证（不需要私钥）
+var verifier = new JwtBuilder
+{
+    Algorithm = "RS256",
+    Secret    = rsaPublicKeyPem,      // PEM 格式公钥
+};
+verifier.TryDecode(token, out _);
+```
+
+#### 算法选型速查
+
+| 算法 | 类型 | 密钥要求 | 适用场景 |
+|------|------|---------|---------|
+| `HS256` | HMAC | 对称密钥（≥32字节）| 单服务/内部 API，**默认推荐** |
+| `HS384/512` | HMAC | 对称密钥 | 更高哈希强度 |
+| `RS256` | RSA | 公/私钥对 | 多服务/公开验签，公钥可公开分发 |
+| `RS384/512` | RSA | 公/私钥对 | 更高哈希强度 |
+
+### 五、ICryptoTransform 直接转换
 
 ```csharp
 // 当需要复用 AES 实例，避免反复创建
@@ -130,6 +212,8 @@ byte[] plain  = dec.Transform(result);
 | Java 对接 | AES-ECB | 需两端协商一致 |
 | 公开加密私解密 | RSA 2048 | 适合密钥协商/小数据 |
 | 签名验证 | RSA Sign/Verify | 防伪造，公钥公开 |
+| 单服务 JWT | `JwtBuilder`（HS256）| 对称密钥，内部 API |
+| 多服务 JWT 验签 | `JwtBuilder`（RS256）| 公钥可公开分发 |
 
 ## 重点检查项
 
@@ -138,6 +222,9 @@ byte[] plain  = dec.Transform(result);
 - [ ] AES 初始化向量（IV）是否与每次加密独立生成并一起存储/传输（相同 IV 重复使用会泄露信息）？
 - [ ] 与 Java 对接时，加/解密模式（CBC vs ECB）和 padding（PKCS7/PKCS5）是否两端一致？
 - [ ] RSA 私钥是否妥善保护（不能出现在日志/错误消息/版本控制中）？
+- [ ] JWT `Secret` 是否从配置中心/环境变量读取（不能硬编码），长度是否满足算法要求（HS256 至少 32 字节）？
+- [ ] JWT `Expire` 是否设置了合理的过期时间（不要过长；也不要使用 `DateTime.MaxValue`）？
+- [ ] RS256 验签时是否使用了公钥（不是私钥），私钥仅在签发服务保存？
 - [ ] 是否在使用已知不安全的 RC4 或 DES？
 
 ## 输出要求
@@ -145,7 +232,7 @@ byte[] plain  = dec.Transform(result);
 - **哈希**：`SecurityHelper` 扩展方法（`MD5`/`SHA256`/`Crc`/`Murmur128`），位于 `NewLife` 命名空间。
 - **对称加密**：`SymmetricAlgorithm` 扩展方法（`Encrypt`/`Decrypt`/`Transform`），同命名空间。
 - **非对称加密**：`RSAHelper` 静态类，位于 `NewLife.Security` 命名空间。
-- **JWT**：`JwtBuilder`（位于 `Web通用令牌JwtBuilder.md`），用于发行和验证 JWT 令牌（文档另见）。
+- **JWT**：`JwtBuilder`（`NewLife.Web`）—— `Encode(payload)`/`TryDecode(token, out msg)`/`Parse(token)`；支持 HS256/RS256；自定义声明通过索引器 `builder["key"] = value` 设置。
 
 ## 参考资料
 
