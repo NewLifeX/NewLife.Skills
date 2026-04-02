@@ -13,10 +13,16 @@
 ```text
 .github/
   skills/                    # 直接给 Copilot 使用的运行态技能
+    benchmark-testing/
+    coding-standards/
+    compatibility-checks/
     capture-conventions/
+    development-workflow/
     merge-skill-knowledge/
     write-tech-docs/
 docs/
+  newlife-core-analysis-roadmap.md
+  newlife-core-source-map.md
   skill-system-design.md     # 技能体系设计说明
 scripts/
   sync-skills-to-user.ps1    # 同步到用户级 Copilot 技能目录
@@ -58,5 +64,9 @@ scripts/
   1. `capture-conventions`
   2. `merge-skill-knowledge`
   3. `write-tech-docs`
-  4. 语言/框架专项技能（如 `csharp-style`, `xcode-repo-analysis`）
-  5. 发布、评审、问题定位等流程型技能
+  4. `coding-standards`
+  5. `compatibility-checks`
+  6. `development-workflow`
+  7. `benchmark-testing`
+  8. 语言/框架专项技能（如 `csharp-style`, `xcode-repo-analysis`）
+  9. 发布、评审、问题定位等流程型技能
