@@ -67,7 +67,7 @@
 | `NewLife.Core/Serialization/*` | 多格式序列化与适配 | 中 | 后续 `binary-serialization` / `serialization-patterns` | 第二批 |
 | `NewLife.Core/Model/ObjectContainer.cs` | IoC、服务提供者、宿主协作 | 中 | 后续 `dependency-injection-patterns` | 第二批 |
 
-## 第一批要落地的技能
+## 第一批（Batch 0，共 8 个技能）
 
 | 技能名 | 主要来源 | 目标 | 状态 |
 |-------|---------|------|------|
@@ -76,20 +76,50 @@
 | `development-workflow` | `development.instructions.md` | 需求→设计→任务→迭代→验收流程 | ✅ 已完成 |
 | `benchmark-testing` | `benchmark.instructions.md` | BenchmarkDotNet 与性能报告规范 | ✅ 已完成 |
 | `write-tech-docs`（增强） | `doc-writer.md` + `文档标准模板.md` | frontmatter、章节骨架、追溯来源 | ✅ 已完成 |
-| `http-client-loadbalancer` | `ApiHttpClient.cs` + `remoting.instructions.md` | 多节点 HTTP 客户端、故障转移、负载均衡 | ✅ 已完成 |
+| `http-client-loadbalancer` | `ApiHttpClient.cs` + `remoting.instructions.md` + `负载均衡与故障转移LoadBalancer.md` | 多节点 HTTP 客户端、故障转移、负载均衡 | ✅ 已完成（Batch 5 增强） |
 | `event-bus-messaging` | `Doc/事件总线EventBus.md` + 源码 | 进程内/主题路由/队列型事件总线 | ✅ 已完成 |
-| `high-performance-buffers` | `Doc/数据包IPacket.md` + `Data/IPacket.cs` | 零拷贝缓冲区、所有权转移、链式包 | ✅ 已完成 |
+| `high-performance-buffers` | `Doc/数据包IPacket.md` + `Data/IPacket.cs` + `SpanReader/Writer.md` + `PacketCodec.md` + `Buffers.md` | 零拷贝缓冲区、所有权转移、链式包、Span 读写器、TCP 粘包拆包 | ✅ 已完成（Batch 5 增强） |
+
+## 第二批（Batch 1–5，共 11 个技能）
+
+### Batch 1 — 应用基础设施
+
+| 技能名 | 主要来源 | 目标 | 状态 |
+|-------|---------|------|------|
+| `config-provider-system` | `Doc/配置系统Config.md` + `Doc/配置提供者IConfigProvider.md` + `configuration.instructions.md` + `Configuration/IConfigProvider.cs` | 强类型配置、多格式文件、远程配置中心、热更新 | ✅ 已完成 |
+| `hosted-services-lifecycle` | `Doc/轻量级应用主机Host.md` + `Model/Host.cs` + `Model/IServer.cs` | 轻量主机、后台服务生命周期、优雅停机 | ✅ 已完成 |
+
+### Batch 2 — 可观测性
+
+| 技能名 | 主要来源 | 目标 | 状态 |
+|-------|---------|------|------|
+| `logging-tracing-system` | `Doc/日志ILog.md` + `Doc/链路追踪ITracer.md` + `Log/ILog.cs` + `Log/ITracer.cs` | ILog 分级写入、XTrace 静态门面、ITracer/ISpan APM 埋点 | ✅ 已完成 |
+| `cache-provider-architecture` | `Doc/缓存系统ICache.md` + `caching.instructions.md` + `Caching/ICache.cs` | 统一缓存接口、原子操作、分布式锁、生产消费队列 | ✅ 已完成 |
+
+### Batch 3 — 架构基础
+
+| 技能名 | 主要来源 | 目标 | 状态 |
+|-------|---------|------|------|
+| `pipeline-handler-model` | `Doc/管道模型Pipeline.md` + `Model/IPipeline.cs` + `net.instructions.md` | IPipeline/IPipelineHandler 管道模型、编解码责任链 | ✅ 已完成 |
+| `dependency-injection-ioc` | `Doc/对象容器ObjectContainer.md` + `Model/ObjectContainer.cs` | ObjectContainer IoC、服务生命周期、ASP.NET Core DI 桥接 | ✅ 已完成 |
+
+### Batch 4 — 网络与序列化
+
+| 技能名 | 主要来源 | 目标 | 状态 |
+|-------|---------|------|------|
+| `network-server-sessions` | `Doc/网络服务端NetServer.md` + `net.instructions.md` + `Net/NetServer.cs` | NetServer/NetSession 生命周期、管道编解码、泛型会话 | ✅ 已完成 |
+| `serialization-patterns` | `Doc/JSON序列化.md` + `Doc/XML序列化.md` + `Doc/二进制序列化Binary.md` + `serialization.instructions.md` | JSON/XML/Binary 序列化选型与 API | ✅ 已完成 |
+
+### Batch 5 — 安全与增强
+
+| 技能名 | 主要来源 | 目标 | 状态 |
+|-------|---------|------|------|
+| `security-crypto-patterns` | `security.instructions.md` + `Doc/安全扩展SecurityHelper.md` | MD5/SHA/AES/RSA/JWT 安全扩展 | ✅ 已完成 |
 
 ## 暂缓项
 
 以下内容价值高，但若立刻通用化容易失真，本轮只登记不迁移：
 
-- `caching.instructions.md`
-- `serialization.instructions.md`
-- `security.instructions.md`
-- `configuration.instructions.md`
-- `remoting.instructions.md`
-- `net.instructions.md`
 - `.github/skills/*.skill.md`
 
 ## 进入下一轮的门槛
