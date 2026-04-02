@@ -44,8 +44,8 @@
 |---------|------|------|---------------|---------|
 | `Doc/核心库目录.md` | 全量导航索引 | 高 | `docs/newlife-core-analysis-roadmap.md`、后续主题映射 | 立即使用 |
 | `Doc/HTTP客户端ApiHttpClient.md` | 多节点 HTTP 客户端、故障转移、负载均衡 | 高 | `http-client-loadbalancer` | 已开始实施 |
-| `Doc/事件总线EventBus.md` | 事件驱动、消息分发 | 高 | `event-bus-messaging` | 第一批样板 |
-| `Doc/数据包IPacket.md` | 高性能缓冲区、数据包设计 | 高 | `high-performance-buffers` | 第一批样板 |
+| `Doc/事件总线EventBus.md` | 事件驱动、消息分发 | 高 | `event-bus-messaging` | **已实施** |
+| `Doc/数据包IPacket.md` | 高性能缓冲区、数据包设计 | 高 | `high-performance-buffers` | **已实施** |
 | `Doc/轻量级应用主机Host.md` | 宿主与生命周期 | 中 | 可能形成 `hosted-services-lifecycle` | 第二批 |
 | `Doc/网络服务端NetServer.md` | 网络服务框架 | 中 | 可能形成 `network-socket-framework` | 第二批 |
 | `Doc/缓存系统ICache.md` | 统一缓存抽象 | 中 | 可能形成 `cache-provider-architecture` | 第二批 |
@@ -69,14 +69,16 @@
 
 ## 第一批要落地的技能
 
-| 技能名 | 主要来源 | 目标 |
-|-------|---------|------|
-| `coding-standards` | `.github/copilot-instructions.md` + `Utility.cs` | 抽象仓库显式编码规范与项目特例处理方式 |
-| `compatibility-checks` | `.github/copilot-instructions.md` + `Utility.cs` | 处理多目标框架、语言版本、条件编译、兼容性边界 |
-| `development-workflow` | `development.instructions.md` | 抽象需求→设计→任务→迭代→验收流程 |
-| `benchmark-testing` | `benchmark.instructions.md` | 抽象 BenchmarkDotNet 与性能报告规范 |
-| `write-tech-docs`（增强） | `doc-writer.md` + `文档标准模板.md` | 强化 frontmatter、章节骨架、追溯来源 |
-| `http-client-loadbalancer` | `ApiHttpClient.cs` + `remoting.instructions.md` + `HTTP客户端ApiHttpClient.md` | 抽象多节点 HTTP 客户端、故障转移、负载均衡与认证模式 |
+| 技能名 | 主要来源 | 目标 | 状态 |
+|-------|---------|------|------|
+| `coding-standards` | `.github/copilot-instructions.md` + `Utility.cs` + `NetServer.cs` | 仓库编码规范与项目特例处理 | ✅ 已完成（Round 3 增强） |
+| `compatibility-checks` | `.github/copilot-instructions.md` + `Utility.cs` | 多目标框架、语言版本、条件编译 | ✅ 已完成 |
+| `development-workflow` | `development.instructions.md` | 需求→设计→任务→迭代→验收流程 | ✅ 已完成 |
+| `benchmark-testing` | `benchmark.instructions.md` | BenchmarkDotNet 与性能报告规范 | ✅ 已完成 |
+| `write-tech-docs`（增强） | `doc-writer.md` + `文档标准模板.md` | frontmatter、章节骨架、追溯来源 | ✅ 已完成 |
+| `http-client-loadbalancer` | `ApiHttpClient.cs` + `remoting.instructions.md` | 多节点 HTTP 客户端、故障转移、负载均衡 | ✅ 已完成 |
+| `event-bus-messaging` | `Doc/事件总线EventBus.md` + 源码 | 进程内/主题路由/队列型事件总线 | ✅ 已完成 |
+| `high-performance-buffers` | `Doc/数据包IPacket.md` + `Data/IPacket.cs` | 零拷贝缓冲区、所有权转移、链式包 | ✅ 已完成 |
 
 ## 暂缓项
 
