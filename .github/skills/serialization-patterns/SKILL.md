@@ -79,8 +79,8 @@ var xmlAttr = config.ToXml(useAttribute: true);
 // 直接序列化到文件（默认附加注释）
 config.ToXmlFile("config/app.xml");
 
-// 从文件反序列化
-var config = XmlHelper.LoadXml<AppConfig>("config/app.xml");
+// 从文件反序列化（扩展方法：this String file）
+var config = "config/app.xml".ToXmlFileEntity<AppConfig>();
 
 // 从字符串反序列化
 var config = xml.ToXmlEntity<AppConfig>();

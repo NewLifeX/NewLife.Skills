@@ -111,8 +111,8 @@ catch (Exception ex)
 var http = new HttpClient();
 // DefaultTracer 自动为 HttpClient 注入 traceparent（若已配置）
 
-// 在事件总线等非 HTTP 场景手动读取
-var traceId = DefaultTracer.Instance?.GetCurrentSpan()?.TraceId;
+// 在事件总线等非 HTTP 场景手动读取当前活跃 Span 的 TraceId
+var traceId = DefaultSpan.Current?.TraceId;  // DefaultSpan.Current 是 AsyncLocal
 ```
 
 ### 六、日志级别与配置

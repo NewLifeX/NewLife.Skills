@@ -58,6 +58,11 @@ var users = cache.GetAll<User>(ids.Select(id => $"user:{id}"));
 
 // 原子递增（统计/限流）
 var count = cache.Increment("page:views", 1);
+
+// 原子递增并同时获取 TTL（限流计数专用）
+// 返回 (Int64 Value, Int32 Ttl)，Ttl < 0 表示 key 尚未设置过期
+var (cnt, ttl) = cache.IncrementWithTtl("rate:user:42", 1);
+if (ttl < 0) cache.SetExpire("rate:user:42", TimeSpan.FromMinutes(1));  // 首次计数时设置窗口
 ```
 
 ### 三、过期时间正确使用
@@ -79,7 +84,7 @@ cache.Set(key, value, expire: 0);  // 若本意是默认过期，应用 -1
 ### 四、分布式锁
 
 ```csharp
-// AcquireLock：获取失败抛出异常
+// 简化重载：AcquireLock(key, msTimeout) — 获取失败抛出异常
 try
 {
     using var lockObj = cacheProvider.Cache.AcquireLock("order:pay:1001", msTimeout: 3000);
@@ -91,6 +96,14 @@ catch (Exception ex) when (ex.Message.Contains("锁"))
     // 降级：等待重试 / 返回"正在处理"
     return Result.Conflict("订单正在处理中，请稍后重试");
 }
+
+// 完整重载：AcquireLock(key, msTimeout, msExpire, throwOnFailure)
+// msExpire：锁的最大持有时长（防止死锁），与 msTimeout 独立
+// throwOnFailure=false：获取失败时返回 null 而不抛出异常
+var lockObj2 = cache.AcquireLock("task:import", msTimeout: 0, msExpire: 30_000, throwOnFailure: false);
+if (lockObj2 == null) return; // 已有其他节点在处理，本次跳过
+try { /* 执行任务 */ }
+finally { lockObj2.Dispose(); }
 ```
 
 ### 五、两级缓存分工
@@ -106,15 +119,27 @@ provider.Cache.Set($"session:{token}", session, 1800);
 ### 六、队列选择
 
 ```csharp
-// 简单队列（command dispatch，topic 多、消息少）
-var cmdQueue = provider.GetQueue<string>("cmd:send-email");
-await cmdQueue.AddAsync(emailJson);
+// IProducerConsumer<T> 真实 API（同步入队，阻塞或异步出队）
+var queue = provider.Cache.GetQueue<String>("cmd:emails");
 
-// 消费组队列（消息可靠投递，topic 少、消息多，支持 ACK）
-var msgQueue = provider.GetQueue<OrderEvent>("events:order", group: "billing");
-var messages = await msgQueue.TakeAsync(batchSize: 10);
-foreach (var msg in messages) { /* 处理 */ await msgQueue.AckAsync(msg.Id); }
+// 入队（支持批量，返回成功入队数）
+queue.Add("payload1", "payload2");
+
+// 同步批量出队（最多取 N 条）
+var batch = queue.Take(10);    // IEnumerable<String>
+
+// 阻塞出队（适合常驻消费者循环，30 秒超时）
+var item = await queue.TakeOneAsync(30);  // String?
+
+// 带取消令牌的异步出队
+var item2 = await queue.TakeOneAsync(30, cancellationToken);
+
+// Acknowledge（仅部分实现支持，如 Redis XACK）
+queue.Acknowledge(processedMsgKey);
 ```
+
+> **注意**：`IProducerConsumer<T>` **没有** `AddAsync`、`TakeAsync`、`AckAsync` 方法。
+> 入队是同步操作 `Add(params T[])`；出队推荐用 `TakeOneAsync` 做异步等待。
 
 ### 七、扩展实现 `ICache`
 
