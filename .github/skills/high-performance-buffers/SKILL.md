@@ -73,6 +73,81 @@ argument-hint: >
 - `ToStr(encoding, offset, count)`：按编码读取文本内容。
 - `Clone()`：深拷贝当前链为独立 `ArrayPacket`，用于断点观察数据快照。
 
+### 七、零分配解析（SpanReader）
+
+`SpanReader` 是 `ref struct`，从 `Span<Byte>` / `IPacket` / `Stream` 零分配读取二进制数据：
+
+```csharp
+// 从 IPacket 构造，直接在原始内存上解析
+var reader = new SpanReader(packet);
+
+// 读取基础类型（默认大端，IsLittleEndian=true 切换小端）
+var magic  = reader.ReadUInt32();
+var length = reader.ReadEncodedInt();           // 7位变长整数
+var name   = reader.ReadString(0);              // 带长度前缀的字符串（长度=0表示读前缀）
+var body   = reader.ReadBytes(length);          // 固定长度切片
+
+// 读取结构体（直接内存布局，零拷贝）
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+struct PacketHeader { ... }
+var header = reader.Read<PacketHeader>();
+```
+
+**关键约束**：`SpanReader` 是 `ref struct`，禁止存入字段、`async` 方法、`Task`、队列。
+
+### 八、零分配写入（SpanWriter / PooledByteBufferWriter）
+
+```csharp
+// 固定缓冲区写入（栈上分配，Size 小于 1KB 时推荐）
+Span<Byte> buf = stackalloc Byte[256];
+var w = new SpanWriter(buf);
+w.Write((UInt32)0x12345678);          // 写 Magic
+w.WriteEncodedInt(messageId);         // 7位变长整数
+w.Write(content, 0);                  // 带长度前缀的字符串
+var written = buf[..w.WrittenCount];  // 已写入的切片
+
+// 动态池化写入（大包或不定长，实现 IBufferWriter<Byte>）
+using var pw = new PooledByteBufferWriter(initialCapacity: 1024);
+var sw = new SpanWriter(pw.GetSpan(256));
+sw.Write(payload);
+pw.Advance(sw.WrittenCount);
+var memory = pw.WrittenMemory;  // ReadOnlyMemory<Byte>，零拷贝输出
+```
+
+### 九、TCP 粘包拆包（PacketCodec）
+
+每个 TCP 连接独立一个 `PacketCodec`，解决粘包/半包问题：
+
+```csharp
+// 在 NetSession 中
+private readonly PacketCodec _codec = new PacketCodec
+{
+    // 从头部读取完整包长度（返回 0 / 负数 = 数据不足）
+    GetLength2 = span =>
+    {
+        if (span.Length < 4) return 0;
+        return (span[0] << 24 | span[1] << 16 | span[2] << 8 | span[3]) + 4;
+    },
+    MaxCache = 4 * 1024 * 1024,  // 防止恶意大包耗尽内存
+    Expire   = 5_000,             // 5秒内未收到完整包则丢弃残余缓存
+};
+
+protected override void OnReceive(ReceivedEventArgs e)
+{
+    // 一包可能包含多条消息，或不足一条
+    foreach (var pk in _codec.Parse(e.Packet))
+        ProcessMessage(pk);  // pk 是一个完整的业务帧
+}
+
+protected override void OnDisconnected(String reason)
+{
+    base.OnDisconnected(reason);
+    _codec.Dispose();  // 释放内部 MemoryStream
+}
+```
+
+**快速路径**：无残余缓存时，`Parse` 直接在原始 `IPacket` 上切片，不分配内存；**慢速路径**：有残余缓存时合并到 `MemoryStream` 后继续解析（有锁保护）。
+
 ## 重点检查项
 
 - [ ] `OwnerPacket` 的释放路径是否完整？是否有 `using` 或等效的 `Dispose` 确保归还池？
