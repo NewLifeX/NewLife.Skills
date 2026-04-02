@@ -140,4 +140,4 @@ await host.StopAsync(cts.Token);
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-host-patterns.md`。
+参考示例与模式证据见 `references/newlife-host-patterns.md`。

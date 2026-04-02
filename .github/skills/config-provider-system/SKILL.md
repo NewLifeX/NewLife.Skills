@@ -141,4 +141,4 @@ var port = args["port"].ToInt(8080);
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-config-patterns.md`。
+参考示例与模式证据见 `references/newlife-config-patterns.md`。

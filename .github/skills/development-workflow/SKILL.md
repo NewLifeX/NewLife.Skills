@@ -58,4 +58,4 @@ argument-hint: 'Provide the project goal, current stage if known, and whether yo
 
 ## 参考资料
 
-- 参考 `references/newlife-core-flow-template.md`
+- 参考 `references/newlife-flow-template.md`

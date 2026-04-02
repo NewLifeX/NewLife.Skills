@@ -172,4 +172,4 @@ public class AuthHandler : Handler
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-pipeline-patterns.md`。
+参考示例与模式证据见 `references/newlife-pipeline-patterns.md`。

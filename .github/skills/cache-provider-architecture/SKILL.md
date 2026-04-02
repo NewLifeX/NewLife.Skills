@@ -142,4 +142,4 @@ foreach (var msg in messages) { /* 处理 */ await msgQueue.AckAsync(msg.Id); }
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-icache-patterns.md`。
+参考示例与模式证据见 `references/newlife-icache-patterns.md`。

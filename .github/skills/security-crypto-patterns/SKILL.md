@@ -149,4 +149,4 @@ byte[] plain  = dec.Transform(result);
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-security-patterns.md`。
+参考示例与模式证据见 `references/newlife-security-patterns.md`。

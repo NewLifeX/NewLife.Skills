@@ -62,7 +62,7 @@ argument-hint: 'Provide the target service pattern, endpoint list, authenticatio
 
 ## 参考资料
 
-- 参考 `references/newlife-core-apihttpclient-patterns.md`
+- 参考 `references/newlife-apihttpclient-patterns.md`
 
 ## 三种负载均衡策略（NewLife.Remoting）
 

@@ -52,4 +52,4 @@ argument-hint: 'Provide the target project files, expected frameworks, and the A
 
 ## 参考资料
 
-- 参考 `references/newlife-core-compatibility-patterns.md`
+- 参考 `references/newlife-compatibility-patterns.md`

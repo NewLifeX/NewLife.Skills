@@ -54,4 +54,4 @@ argument-hint: 'Provide the repository or files to inspect, the language, and wh
 
 ## 参考资料
 
-- 参考 `references/newlife-core-csharp-style.md`
+- 参考 `references/newlife-csharp-style.md`

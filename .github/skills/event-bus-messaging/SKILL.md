@@ -83,4 +83,4 @@ argument-hint: >
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-eventbus-patterns.md`。
+参考示例与模式证据见 `references/newlife-eventbus-patterns.md`。

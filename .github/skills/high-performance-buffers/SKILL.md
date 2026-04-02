@@ -168,4 +168,4 @@ protected override void OnDisconnected(String reason)
 
 ## 参考资料
 
-参考示例与设计决策证据见 `references/newlife-core-ipacket-patterns.md`。
+参考示例与设计决策证据见 `references/newlife-ipacket-patterns.md`。

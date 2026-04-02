@@ -148,4 +148,4 @@ var traceId = DefaultTracer.Instance?.GetCurrentSpan()?.TraceId;
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-log-tracer-patterns.md`。
+参考示例与模式证据见 `references/newlife-log-tracer-patterns.md`。

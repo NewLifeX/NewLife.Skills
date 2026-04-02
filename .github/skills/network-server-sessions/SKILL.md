@@ -183,4 +183,4 @@ Console.WriteLine($"当前 {server.SessionCount} / 峰值 {server.MaxSessionCoun
 
 ## 参考资料
 
-参考示例与模式证据见 `references/newlife-core-netserver-patterns.md`。
+参考示例与模式证据见 `references/newlife-netserver-patterns.md`。
