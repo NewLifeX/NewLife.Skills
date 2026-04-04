@@ -7,7 +7,7 @@
       Skills        → %APPDATA%\Code\User\prompts\skills\
       Instructions  → %APPDATA%\Code\User\prompts\
       Prompts       → %APPDATA%\Code\User\prompts\
-      Agents        → %APPDATA%\Code\User\chatmodes\
+      Agents        → %APPDATA%\Code\User\prompts\  (*.agent.md，与 instructions 同目录)
 
     安装后无需在每个项目都放 .github 目录，Copilot 即可使用全部资产。
 
@@ -44,7 +44,7 @@ $globalInstrSrc = Join-Path $githubDir "copilot-instructions.md"
 # ── Destination ───────────────────────────────────────────────────────────────
 $skillsDst  = Join-Path $userDataDir "prompts\skills"
 $promptsDst = Join-Path $userDataDir "prompts"
-$agentsDst  = Join-Path $userDataDir "chatmodes"
+$agentsDst  = $promptsDst  # agents (*.agent.md) 放在 prompts/ 下，与 instructions/prompts 同级
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 function EnsureDir ([string]$Path) {
@@ -123,9 +123,9 @@ if (Test-Path $promptsSrc) {
     Write-Host "    （跳过：$promptsSrc 不存在）" -ForegroundColor DarkGray
 }
 
-# ─── 4. Agents / Chat Modes ───────────────────────────────────────────────────
+# ─── 4. Agents ───────────────────────────────────────────────────────────────
+# *.agent.md 放在 prompts/ 下，VS Code Copilot 从此目录识别 agent 模式
 Write-Host "[4/5] Agents" -ForegroundColor Yellow
-EnsureDir $agentsDst
 
 if (Test-Path $agentsSrc) {
     if ($Clean) {
@@ -165,7 +165,7 @@ Write-Host "安装路径：" -ForegroundColor White
 Write-Host "  Skills      : $skillsDst"
 Write-Host "  Instructions: $promptsDst  (*.instructions.md)"
 Write-Host "  Prompts     : $promptsDst  (*.prompt.md)"
-Write-Host "  Agents      : $agentsDst"
+Write-Host "  Agents      : $promptsDst  (*.agent.md)"
 Write-Host ""
 Write-Host "重启 VS Code 后即可在所有项目中使用以上资产。" -ForegroundColor Gray
 Write-Host ""

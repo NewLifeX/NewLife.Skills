@@ -122,7 +122,7 @@ scripts/
 | Skills (`<name>/SKILL.md` 文件夹) | `%APPDATA%\Code\User\prompts\skills\` |
 | Instructions (`*.instructions.md`) | `%APPDATA%\Code\User\prompts\` |
 | Prompts (`*.prompt.md`) | `%APPDATA%\Code\User\prompts\` |
-| Agents (`*.agent.md`) | `%APPDATA%\Code\User\chatmodes\` |
+| Agents (`*.agent.md`) | `%APPDATA%\Code\User\prompts\` |
 | 全局指令 (`copilot-instructions.md`) | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
 
 ---
