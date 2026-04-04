@@ -1,9 +1,7 @@
 ---
-name: newlife-expert
-description: NewLife 全生态技术专家，精通 NewLife.Core 及所有子项目，能检索功能、推荐组件、解答用法问题
-tools:
-  - readFile
-  - search
+name: "NewLife专家"
+description: "NewLife 全生态技术专家，精通 NewLife.Core 及所有子项目，能检索功能、推荐组件、解答用法问题"
+tools: [read, search]
 ---
 
 # NewLife 技术专家

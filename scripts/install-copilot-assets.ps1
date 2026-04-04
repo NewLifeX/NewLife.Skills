@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     安装 NewLife Copilot 资产到 VSCode 用户数据目录，使其对本机所有项目生效。
 
@@ -159,13 +159,16 @@ if (Test-Path $globalInstrSrc) {
 
 # ─── 完成 ─────────────────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "=== 安装完成，共 $installed 项 ===" -ForegroundColor Green
+$msg = "=== 安装完成，共 $installed 项 ==="
+Write-Host $msg -ForegroundColor Green
 Write-Host ""
-Write-Host "安装路径：" -ForegroundColor White
+$dstInfo = "Install Paths:"
+Write-Host $dstInfo
 Write-Host "  Skills      : $skillsDst"
-Write-Host "  Instructions: $promptsDst  (*.instructions.md)"
-Write-Host "  Prompts     : $promptsDst  (*.prompt.md)"
-Write-Host "  Agents      : $promptsDst  (*.agent.md)"
+Write-Host "  Instructions: $promptsDst  *.instructions.md"
+Write-Host "  Prompts     : $promptsDst  *.prompt.md"
+Write-Host "  Agents      : $promptsDst  *.agent.md"
 Write-Host ""
-Write-Host "重启 VS Code 后即可在所有项目中使用以上资产。" -ForegroundColor Gray
+$hint = "重启 VS Code 后即可在所有项目中使用以上资产。"
+Write-Host $hint
 Write-Host ""

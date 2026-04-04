@@ -1,9 +1,7 @@
 ---
-name: code-review
-description: 针对 NewLife 编码规范进行代码审查，检查命名、兼容性、性能和安全问题
-tools:
-  - readFile
-  - search
+name: "代码审查"
+description: "针对 NewLife 编码规范进行代码审查，检查命名、兼容性、性能和安全问题"
+tools: [read, search]
 ---
 
 # NewLife 代码审查

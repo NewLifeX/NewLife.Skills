@@ -286,12 +286,15 @@ using var _ = _lock.AcquireLock();
 
 `.github/agents/` 目录下定义了专用 AI 代理角色，用户可在 Copilot Chat 中通过 `@` 调用。
 
-| 代理文件 | 用途 |
-|---------|------|
-| `newlife-expert.agent.md` | NewLife 组件专家：功能查询、组件推荐、编码指导 |
-| `code-review.agent.md` | 代码审查：按 NewLife 规范 8 维度检查代码 |
-| `project-init.agent.md` | 项目初始化：按模板创建新 NewLife 项目结构 |
-| `release-prep.agent.md` | 发版准备：ChangeLog/版本号/PackageReleaseNotes 全自动更新 |
+| 代理文件 | 中文名 | 用途 |
+|---------|-------|------|
+| `newlife-expert.agent.md` | NewLife专家 | NewLife 组件专家：功能查询、组件推荐、编码指导 |
+| `code-review.agent.md` | 代码审查 | 代码审查：按 NewLife 规范 8 维度检查代码 |
+| `project-init.agent.md` | 项目初始化 | 项目初始化：按模板创建新 NewLife 项目结构 |
+| `release-prep.agent.md` | 发版准备 | 发版准备：ChangeLog/版本号/PackageReleaseNotes 全自动更新 |
+| `write-tech-docs.agent.md` | 文档写作 | 技术文档：读源码/现有文档，编写中文技术文档 |
+| `requirement-planning.agent.md` | 需求规划 | 需求规划：需求整理、功能拆分、技术方案、任务分解 |
+| `convention-mining.agent.md` | 规范提炼 | 规范提炼：分析代码库，提炼编码约定到 SKILL.md/instructions |
 
 ---
 

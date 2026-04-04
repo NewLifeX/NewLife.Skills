@@ -1,10 +1,7 @@
 ---
-name: project-init
-description: 辅助初始化基于 NewLife 技术栈的新项目，推荐架构和依赖，生成项目脚手架
-tools:
-  - readFile
-  - search
-  - editFiles
+name: "项目初始化"
+description: "辅助初始化基于 NewLife 技术栈的新项目，推荐架构和依赖，生成项目脚手架"
+tools: [read, search, edit]
 ---
 
 # NewLife 项目初始化助手

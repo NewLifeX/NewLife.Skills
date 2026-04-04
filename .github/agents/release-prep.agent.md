@@ -10,10 +10,11 @@ tools: [execute, read, edit, search, todo]
 
 版本号格式：`v{大版本}.{小版本}.{年}.{月日4位}`
 - 示例：`v3.1.2026.0404` → 大版本 3，小版本 1，2026年4月4日发布
-- csproj 中 `VersionPrefix` 不含 `v` 前缀：`3.1.2026.0404`
+- **csproj 中 `VersionPrefix` 只含两段**：`{大版本}.{小版本}`，例如 `3.1`；年份和月日由 GitHub Actions 发布时自动拼接，**不要在 csproj 里写四段**
+- ChangeLog.md、PackageReleaseNotes 等文档中仍使用完整四段版本号
 - 大版本号：**由人工决定，绝不自动修改**
 - 小版本号：若有新增功能或重大重构，加 1；若仅有 bug 修复或小优化，保持不变
-- 年月日：始终使用今天的实际日期
+- 年月日：始终使用今天的实际日期（仅用于文档，不写入 csproj）
 
 ## ChangeLog.md 格式规范
 
@@ -51,7 +52,8 @@ tools: [execute, read, edit, search, todo]
 2. 生成 ChangeLog 条目并写入 ChangeLog.md
 3. 定位可发布项目文件（csproj）
 4. 更新 csproj 版本号和 PackageReleaseNotes
-5. 更新 Readme.md（如有新功能）
+5. 更新版权年份
+6. 更新 Readme.md（如有新功能）
 
 ### 第二步：分析 git 提交日志
 
@@ -94,7 +96,7 @@ git log --pretty=format:"%h %s" --no-merges -60
 4. 年份使用当前年，月日使用今天的 MMDD（4位，不足补0）
 5. **大版本号绝不自动修改**
 
-新版本号示例：若当前 `VersionPrefix` 为 `3.1.2026.0301`，今天是 2026-04-04，有新功能，则新版本为 `3.2.2026.0404`（小版本 +1）；若仅 bug 修复，则为 `3.1.2026.0404`。
+新版本号示例：若当前 `VersionPrefix` 为 `3.1`，有新功能，则新版本为 `3.2`（小版本 +1）；若仅 bug 修复，则保持 `3.1` 不变。ChangeLog.md 中记录完整版本 `v3.2.2026.0404`，csproj 只写 `3.2`。
 
 ### 第四步：写入 ChangeLog.md
 
@@ -139,25 +141,21 @@ grep -rl "<IsPackable>true</IsPackable>" --include="*.csproj" .
 
 对每个待发布的 csproj 文件进行如下更新：
 
-**更新 VersionPrefix：**
+**更新 VersionPrefix（只含两段）：**
 ```xml
 <!-- 旧值 -->
-<VersionPrefix>3.1.2026.0301</VersionPrefix>
-<!-- 新值 -->
-<VersionPrefix>3.2.2026.0404</VersionPrefix>
+<VersionPrefix>3.1</VersionPrefix>
+<!-- 新值（有新功能则小版本 +1，否则不变） -->
+<VersionPrefix>3.2</VersionPrefix>
 ```
 
+> 若发现 csproj 中 `VersionPrefix` 仍是四段格式（如 `3.1.2026.0301`），需一并修正为两段格式。
+
 **更新 PackageReleaseNotes：**
-将 ChangeLog 内容进一步提炼为 3-8 条简洁要点，格式为纯文本或 Markdown 列表，放入 `PackageReleaseNotes`：
+将 ChangeLog 内容提炼为 3-8 条要点，用**全角分号**（`；`）分隔，全部写在一行，不加版本号前缀，不加详细日志链接：
 
 ```xml
-<PackageReleaseNotes>
-v3.2.2026.0404
-- 新增 XXX 功能，支持 YYY 场景
-- 重构 ZZZ 模块，性能提升 N 倍
-- 修复 ABC 在 XYZ 情况下崩溃的问题
-详细日志：https://github.com/NewLifeX/{项目名}/blob/master/ChangeLog.md
-</PackageReleaseNotes>
+<PackageReleaseNotes>新增 XXX 功能，支持 YYY 场景；重构 ZZZ 模块，性能提升 N 倍；修复 ABC 在 XYZ 情况下崩溃的问题</PackageReleaseNotes>
 ```
 
 **更新 PackageTags（可选）：**
@@ -165,7 +163,25 @@ v3.2.2026.0404
 - 若本次新增了重要功能领域，在现有 tags 基础上追加相关关键词
 - 若无明显新领域，**保持不变**
 
-### 第七步：更新 Readme.md
+### 第七步：更新版权年份
+
+检查所有发布 csproj 文件及仓库根目录下的版权声明，将过期的结束年份更新为当前年份：
+
+1. 在 csproj 中搜索 `<Copyright>` 标签，提取版权字符串，例如 `Copyright © 2002-2025 NewLife`。
+2. 识别年份范围格式：若版权中包含 `{开始年}-{结束年}` 模式，检查结束年份是否等于当前年份。
+3. 若结束年份 **小于** 当前年份，自动将结束年份更新为当前年份：
+
+```xml
+<!-- 旧值 -->
+<Copyright>Copyright © 2002-2024 NewLife</Copyright>
+<!-- 新值（当前年份 2026） -->
+<Copyright>Copyright © 2002-2026 NewLife</Copyright>
+```
+
+4. 同样检查 `AssemblyInfo.cs`（若存在）中的 `[assembly: AssemblyCopyright(...)]` 属性。
+5. 若版权中只有单一年份（非范围格式），**不做修改**。
+
+### 第八步：更新 Readme.md
 
 1. 读取 `Readme.md` 文件
 2. 判断本次版本是否有：
@@ -175,11 +191,15 @@ v3.2.2026.0404
 3. 若有，找到 Readme 中合适的位置（通常是功能列表、更新日志摘要或"最新特性"章节）插入或更新对应内容
 4. 若本次仅是常规优化和 bug 修复，**不必修改 Readme**
 
+> 注意：Readme.md 为第八步，版权年份更新（第七步）须在 Readme 之前完成。
+
 ## 约束与原则
 
 - **仅修改必要文件**：`ChangeLog.md`、待发布的 `.csproj` 文件、`Readme.md`（按需）
 - **大版本号绝不自动修改**，若不确定小版本是否需要变更，倾向于保守（不变）并告知用户
-- `VersionPrefix` 格式始终为 `{大}.{小}.{年4位}.{月日4位}`，月日共4位（如4月4日为 `0404`）
+- `VersionPrefix` 格式**只含两段** `{大}.{小}`（如 `3.2`），年份和月日由 GitHub Actions 自动拼接，禁止在 csproj 写四段
+- 发现 csproj 中已存在四段 `VersionPrefix` 时，修正为两段格式
+- 版权年份结束值必须等于当前年份，若不符则自动修正
 - ChangeLog 条目用**中文**描述，简洁清晰，突出用户视角的价值
 - 不要修改项目的 `AssemblyVersion`、`FileVersion` 等其他版本字段，除非它们引用了 `VersionPrefix`
 - 每完成一步后，用 todo 工具将该任务标记为 completed，再继续下一步
