@@ -1,34 +1,10 @@
-param(
-    [string]$Source = (Join-Path $PSScriptRoot "..\.github\skills"),
-    [string]$Destination = (Join-Path $HOME ".copilot\skills"),
-    [switch]$Clean
-)
+# 此脚本已改名为 install-copilot-assets.ps1，本文件保留为兼容入口。
+# This script has been renamed to install-copilot-assets.ps1.
+param([switch]$Clean)
 
-$sourcePath = (Resolve-Path $Source).Path
-
-if (-not (Test-Path $sourcePath)) {
-    throw "Source skills folder not found: $Source"
+$newScript = Join-Path $PSScriptRoot "install-copilot-assets.ps1"
+if (Test-Path $newScript) {
+    & $newScript @PSBoundParameters
+} else {
+    Write-Error "未找到新脚本: $newScript"
 }
-
-if (-not (Test-Path $Destination)) {
-    New-Item -ItemType Directory -Path $Destination -Force | Out-Null
-}
-
-$skillFolders = Get-ChildItem -Path $sourcePath -Directory
-
-foreach ($folder in $skillFolders) {
-    $target = Join-Path $Destination $folder.Name
-
-    if ($Clean -and (Test-Path $target)) {
-        Remove-Item -Path $target -Recurse -Force
-    }
-
-    if (-not (Test-Path $target)) {
-        New-Item -ItemType Directory -Path $target -Force | Out-Null
-    }
-
-    Copy-Item -Path (Join-Path $folder.FullName "*") -Destination $target -Recurse -Force
-    Write-Host "Synced skill: $($folder.Name) -> $target"
-}
-
-Write-Host "Done. Skills synced to $Destination"

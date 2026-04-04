@@ -1,72 +1,134 @@
 # NewLife Skills
 
-这个仓库用于沉淀 **NewLife 团队与个人长期可复用的技能资产**，包括：知识、方法、规范、模板，以及后续可扩展的脚本与自动化流程。
+**NewLife Copilot 资产统一管理库**——集中管理 NewLife 系列项目所有可复用的 Copilot 资产：技能、指令、提示词、智能体。
 
-## 目标
+克隆到任意机器后，执行一条脚本即可将全部资产安装到 VS Code 用户数据目录，**无需在每个项目里各放一份 `.github`**。
 
-- 让技能可以被 Git 管理、版本化、跨设备同步。
-- 让技能既适合人类阅读维护，也尽量兼容 Copilot 直接加载。
-- 让“经验捕获 → 知识融合 → 再发布”形成闭环。
+---
 
-## 推荐结构
+## 快速开始
+
+### 安装到本机（Win10/Win11 + VS Code + GitHub Copilot）
+
+```powershell
+# 克隆此仓库
+git clone https://github.com/NewLifeX/NewLife.Skills.git
+cd NewLife.Skills
+
+# 安装全部 Copilot 资产到用户级目录
+.\scripts\install-copilot-assets.ps1
+```
+
+安装完成后**重启 VS Code**，所有项目即可使用以下资产，无需在每个项目中放 `.github` 目录。
+
+---
+
+## 资产清单
+
+### Skills（技能）
+
+存放于 `.github/skills/`，每个技能一个子目录，含 `SKILL.md` 详细指南。共 59 个技能文件夹。
+
+**快速使用指南（usage 类）**——按需快速上手，代码示例为主：
+
+| 技能目录 | 覆盖领域 |
+|---------|---------|
+| `caching` | ICache/MemoryCache/Redis 统一缓存接口 |
+| `logging-tracing` | ILog/XTrace 日志与 ITracer/DefaultTracer 链路追踪 |
+| `networking` | NetServer/NetSession TCP/UDP/WebSocket 网络编程 |
+| `serialization` | JSON/Binary/Span/CSV 序列化 |
+| `configuration` | Config&lt;T&gt;/IConfigProvider/HttpConfigProvider 配置管理 |
+| `http-client` | ApiHttpClient 多节点 HTTP 客户端与负载均衡 |
+| `dependency-injection` | ObjectContainer/Host/Plugin/Actor 依赖注入与宿主 |
+| `timer-scheduling` | TimerX/Cron 高级定时调度 |
+| `security` | Hash/AES/SM4/RSA/JWT/TokenProvider 安全与加密 |
+| `type-conversion` | ToInt/ToBoolean/StringHelper/Pool.StringBuilder 类型转换与工具 |
+
+**深度设计指南（architecture 类）**——涵盖 XCode/Cube/Redis/MQTT/Net/序列化/安全/定时器等所有领域，共 49 个技能文件夹。代表性技能：
+
+| 技能目录 | 覆盖领域 |
+|---------|---------|
+| `xcode-entity-orm` | NewLife.XCode 实体 CRUD 开发 |
+| `xcode-data-modeling` | XCode Model.xml 数据建模 |
+| `cube-mvc-backend` | NewLife.Cube MVC 后台管理系统 |
+| `redis-client` | NewLife.Redis 高性能 Redis 客户端 |
+| `network-server-sessions` | NetServer/NetSession 高性能网络服务器 |
+| `cache-provider-architecture` | ICache 统一缓存接口与分布式锁 |
+| `security-crypto-patterns` | Hash/AES/RSA/JWT 加密安全 |
+| `stardust-platform` | 星尘分布式服务平台接入 |
+| `agent-service` | NewLife.Agent 跨平台系统服务 |
+| `benchmark-testing` | BenchmarkDotNet 性能基准测试 |
+
+### Instructions（指令）
+
+存放于 `.github/instructions/`，触发关键词时 Copilot 自动加载：
+
+| 文件 | 触发场景 |
+|------|---------|
+| `xcode.instructions.md` | XCode / 数据库 / Model.xml |
+| `net.instructions.md` | NetServer / 网络编程 |
+| `benchmark.instructions.md` | 性能测试 / BenchmarkDotNet |
+| `development.instructions.md` | 新建系统 / 需求分析 / 架构设计 |
+| `caching.instructions.md` | ICache / MemoryCache / Redis 缓存 |
+| `serialization.instructions.md` | JSON / Binary 序列化 |
+| `security.instructions.md` | 加密 / Hash / JWT / RSA |
+| `remoting.instructions.md` | ApiHttpClient / RPC / 负载均衡 |
+| `configuration.instructions.md` | Config / IConfigProvider / 配置中心 |
+
+### Prompts（提示词）
+
+存放于 `.github/prompts/`：
+
+| 文件 | 用途 |
+|------|------|
+| `doc-writer.prompt.md` | 为 C# 代码生成高质量 Markdown 文档 |
+
+### Agents（智能体）
+
+存放于 `.github/agents/`：
+
+| 文件 | 用途 |
+|------|------|
+| `newlife-expert.agent.md` | NewLife 全生态技术专家 |
+| `code-review.agent.md` | NewLife 代码审查（8维度检查） |
+| `project-init.agent.md` | NewLife 新项目初始化助手 |
+| `release-prep.agent.md` | 开源库月度发版准备（ChangeLog/版本号/README） |
+
+---
+
+## 仓库结构
 
 ```text
 .github/
-  skills/                    # 直接给 Copilot 使用的运行态技能
-    benchmark-testing/
-    coding-standards/
-    compatibility-checks/
-    capture-conventions/
-    development-workflow/
-    merge-skill-knowledge/
-    write-tech-docs/
-docs/
-  newlife-core-analysis-roadmap.md
-  newlife-core-source-map.md
-  skill-system-design.md     # 技能体系设计说明
+  copilot-instructions.md      # NewLife 全局 Copilot 协作规范（含编码规范）
+  agents/                      # 智能体定义 (*.agent.md)  → chatmodes/
+  instructions/                # 场景指令 (*.instructions.md)  → prompts/
+  prompts/                     # 提示词模板 (*.prompt.md)  → prompts/
+  skills/                      # 技能文件夹，全部为 <name>/SKILL.md 格式 → prompts/skills/
+docs/                          # 分析文档、设计说明
 scripts/
-  sync-skills-to-user.ps1    # 同步到用户级 Copilot 技能目录
+  install-copilot-assets.ps1   # 安装脚本（主入口）
+  sync-skills-to-user.ps1      # 旧名称兼容包装器
 ```
 
-## 设计原则
+---
 
-1. **运行态扁平，知识态分层**
-   - Copilot 直接识别的技能目录建议放在 `.github/skills/<skill-name>/`，保持扁平。
-   - 更细的知识分层、分类、归档，放在 `docs/` 或未来扩展的知识目录中。
+## 安装说明
 
-2. **路径英文，内容中文优先**
-   - 目录名、技能名、脚本名优先使用英文 kebab-case，便于兼容性与跨平台。
-   - `SKILL.md` 正文、说明文档、示例内容，完全可以使用中文。
+`install-copilot-assets.ps1` 将资产复制到以下 VS Code 用户数据目录：
 
-3. **技能分三层**
-   - 捕获型：从代码、目录、提交、问答中提炼稳定规律。
-   - 融合型：把新发现与已有知识合并，避免重复和冲突。
-   - 生产型：在写代码、写文档、做评审时直接调用。
+| 资产类型 | 目标路径 |
+|---------|---------|
+| Skills (`<name>/SKILL.md` 文件夹) | `%APPDATA%\Code\User\prompts\skills\` |
+| Instructions (`*.instructions.md`) | `%APPDATA%\Code\User\prompts\` |
+| Prompts (`*.prompt.md`) | `%APPDATA%\Code\User\prompts\` |
+| Agents (`*.agent.md`) | `%APPDATA%\Code\User\chatmodes\` |
+| 全局指令 (`copilot-instructions.md`) | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
 
-## 推荐工作流
+---
 
-1. 在仓库或目录上运行“捕获型技能”。
-2. 生成候选知识条目。
-3. 调用“融合型技能”与已有技能文件合并。
-4. 产出新的稳定技能文件并提交 Git。
-5. 通过脚本同步到用户级 Copilot 技能目录。
+## 维护说明
 
-## 与 Copilot 的关系
-
-- 当前仓库中的 `.github/skills/` 适合在**打开本仓库时**直接被 Copilot 使用。
-- 如果希望跨项目全局复用，建议把技能同步到用户级技能目录。
-- `scripts/sync-skills-to-user.ps1` 提供了一个起点，后续可接入计划任务、登录脚本或你自己的工具链。
-
-## 下一步建议
-
-- 先沉淀 10~20 个高价值技能，而不是一次铺满所有类别。
-- 优先顺序建议：
-  1. `capture-conventions`
-  2. `merge-skill-knowledge`
-  3. `write-tech-docs`
-  4. `coding-standards`
-  5. `compatibility-checks`
-  6. `development-workflow`
-  7. `benchmark-testing`
-  8. 语言/框架专项技能（如 `csharp-style`, `xcode-repo-analysis`）
-  9. 发布、评审、问题定位等流程型技能
+1. 从其他 NewLife 仓库（如 `.github/` 目录）学到新规范后，在此库中统一更新。
+2. 更新后重新运行 `install-copilot-assets.ps1` 即可覆盖更新本机资产。
+3. 提交到 Git，其他机器 `git pull` 后再次运行脚本即可同步。
