@@ -38,6 +38,7 @@ argument-hint: >
 | 本地 INI | `IniConfigProvider` |
 | 星尘/自研配置中心 | `HttpConfigProvider` |
 | Apollo | `ApolloConfigProvider` |
+| 数据库 Parameter 表 | `DbConfigProvider`（服务端 + Membership 场景） |
 | 多来源组合 | `CompositeConfigProvider` |
 
 ### 二、定义 `Config<T>` 强类型配置
@@ -68,7 +69,71 @@ var cfg = AppSettings.Current;
 var port = cfg.Port;
 ```
 
-### 三、切换为远程配置中心
+### 三、使用 DbConfigProvider 数据库配置
+
+当服务端应用使用了 XCode Membership 数据库时，推荐将业务配置存储在 `Parameter` 表中。
+
+#### 核心属性
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `UserId` | `Int32` | `0` | 用户ID。`0` = 系统级全局配置，非零 = 特定用户的个性化配置 |
+| `Category` | `String` | `null` | 分类名，对应 Parameter 表的 Category 字段，区分不同配置类 |
+| `CacheLevel` | `ConfigCacheLevel` | `Json` | 本地缓存级别。`NoCache`/`Json`/`Encrypted` |
+| `Period` | `Int32` | `15` | 定时轮询间隔（秒），0 表示不自动更新 |
+
+#### Parameter 表结构
+
+Parameter 表属于 XCode Membership 模块（`Membership` 连接名），核心字段：
+
+| 字段 | 说明 |
+|------|------|
+| `UserID` | 用户ID，0 表示系统级 |
+| `Category` | 分类，对应配置类（如 `"Order"`/`"Pay"`/`"Cube"`） |
+| `Name` | 配置键（属性名），支持冒号分隔多级 |
+| `Value` | 配置值（短文本，<200字符） |
+| `LongValue` | 配置值（长文本，≥200字符） |
+| `Enable` | 是否启用 |
+| `Remark` | 备注，对应属性的 `[Description]` |
+
+#### 静态构造函数模式
+
+```csharp
+[DisplayName("订单设置")]
+[Config("Order")]
+public class OrderSetting : Config<OrderSetting>
+{
+    /// <summary>指向数据库参数字典表</summary>
+    static OrderSetting() => Provider = new DbConfigProvider { UserId = 0, Category = "Order" };
+
+    [Description("订单超时时间。默认30分钟")]
+    [Category("通用")]
+    public Int32 OrderTimeout { get; set; } = 30;
+
+    protected override void OnLoaded()
+    {
+        if (OrderTimeout <= 0) OrderTimeout = 30;
+        base.OnLoaded();
+    }
+}
+```
+
+**关键点**：
+- `Category` 一般用配置类去掉 `Setting`/`Config` 后缀的名称（如 `CubeSetting` → `"Cube"`，`OrderSetting` → `"Order"`）
+- 静态构造函数只赋值 `Provider`，**不会触发 `Current` 加载**，因此不会死锁
+- 首次加载时，如果数据库无数据但本地配置文件存在，`DbConfigProvider` 会自动将文件配置迁移保存到数据库
+
+#### 本地缓存与定时刷新
+
+- **本地缓存兜底**：配置加载后自动写入 `Data/dbConfig_{Category}.json`，数据库不可用时从缓存加载
+- **定时轮询**：`Period` 秒后 `TimerX` 定时遍历 Parameter 表，发现变更则重新加载并触发 `NotifyChange()`，绑定的配置对象自动更新
+- **加密存储**：`CacheLevel = ConfigCacheLevel.Encrypted` 时本地缓存文件内容会 AES 加密
+
+#### 与配置页面的配合
+
+使用 `DbConfigProvider` 后，可在 Cube 后台通过 `ConfigController<TConfig>` 配置控制器提供 Web 编辑页面。修改后 `ConfigController` 调用 `Copy + Save`，`DbConfigProvider` 将变更写回 Parameter 表，定时刷新机制确保其他实例同步。
+
+### 四、切换为远程配置中心
 
 ```csharp
 // 在应用启动最早处（Main / 程序入口）覆盖 Provider
@@ -86,7 +151,7 @@ AppSettings.Provider = new HttpConfigProvider
 - `Provider` 必须在首次访问 `Current` 之前赋值；赋值后置空 `_Current`（若有该 API）重新加载。
 - 不要在 DI 容器构造期间访问 `Current`，可能导致提供者尚未替换。
 
-### 四、热更新绑定模型
+### 五、热更新绑定模型
 
 ```csharp
 var provider = new HttpConfigProvider { /* ... */ };
@@ -105,7 +170,7 @@ provider.Changed += (_, _) =>
 - `Bind` 会立即从 `provider` 加载一次，后续配置变更触发 `Changed` 时自动更新属性。
 - 修改绑定后的模型属性后，需要显式调用 `provider.Save(model)` 才能持久化。
 
-### 五、命令行参数解析
+### 六、命令行参数解析
 
 ```csharp
 var parser = new CommandParser { IgnoreCase = true };
@@ -117,7 +182,7 @@ var args = parser.Parse(Environment.GetCommandLineArgs());
 var port = args["port"].ToInt(8080);
 ```
 
-### 六、自定义 `IConfigProvider`
+### 七、自定义 `IConfigProvider`
 
 1. 实现 `LoadAll()`（从数据源 → 配置树 `Root`）和 `SaveAll()`（配置树 → 数据源）。
 2. `this[key]` 的 get 调用 `Root` 的节点树遍历，set 写回对应节点并触发 `Changed`。
@@ -126,11 +191,13 @@ var port = args["port"].ToInt(8080);
 ## 重点检查项
 
 - [ ] 是否面向 `IConfigProvider` 接口，而非直接依赖具体类？
-- [ ] `Config<T>.Current` 是否在构造函数内（包括静态构造）被调用，导致递归？
+- [ ] `Config<T>.Current` 是否在构造函数内（包括静态构造）被调用，导致递归？（注意：静态构造中赋值 `Provider` 是安全的）
 - [ ] 远程提供者的 `AppId` 是否已设置（未设置会被服务端拒绝）？
 - [ ] 热更新 `Bind` 后修改属性是否遗漏 `Save()`？
 - [ ] 配置修改后是否调用了 `SaveAll()` / `Save()`（变更不会自动持久化到文件）？
 - [ ] 多来源场景是否用了 `CompositeConfigProvider` 管理优先级？
+- [ ] `DbConfigProvider` 的 `Category` 是否与配置类 `[Config("xxx")]` 的名称一致？
+- [ ] 服务端应用使用 Membership 数据库时，配置是否已切换为 `DbConfigProvider`？
 
 ## 输出要求
 

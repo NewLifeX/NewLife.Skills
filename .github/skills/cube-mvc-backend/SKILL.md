@@ -21,6 +21,7 @@ argument-hint: >
 - 继承 `EntityController<T>` 开发实体 CRUD 页面并定制字段显示。
 - 覆盖魔方内置视图（通过本地物理文件优先机制）。
 - 配置菜单特性、权限过滤器、数据权限中间件。
+- 继承 `ConfigController<T>` 为配置类提供 Web 查看和编辑页面。
 
 ---
 
@@ -99,7 +100,94 @@ public class OrderArea : AreaBase
 | `LastUpdate` | 日期字符串，内置菜单有改动时需更新此值以触发重建 |
 
 ---
+## ConfigController\<T\> 配置控制器
 
+为 `Config<T>` 配置类提供 Web 查看和编辑页面。当业务应用定义了配置类（如 `OrderSetting : Config<OrderSetting>`），可在 Web 项目中添加一个控制器来提供配置管理页面。
+
+### 最简用法（零代码控制器）
+
+大多数情况下，配置控制器**不需要编写任何成员代码**，继承即可：
+
+```csharp
+using System.ComponentModel;
+using Microsoft.AspNetCore.Mvc;
+
+/// <summary>订单设置控制器</summary>
+[DisplayName("订单设置")]                         // 菜单显示名
+[OrderArea]                                         // 声明所属区域
+[Menu(0, false, Icon = "fa-cog")]                    // 菜单排序与可见性
+public class OrderSettingController : ConfigController<OrderSetting>
+{
+}
+```
+
+配置控制器自动提供：
+- **查看页**：按 `[Category]` 分组展示所有配置项，显示 `[Description]` 作为说明
+- **编辑页**：表单修改配置值，保存时通过 `Copy + Save` 确保线程安全更新
+
+### 进阶用法（自定义字段与保存逻辑）
+
+参考 `CubeController`，可通过重写方法实现业务定制：
+
+```csharp
+[DisplayName("支付设置")]
+[OrderArea]
+[Menu(0, false, Icon = "fa-credit-card")]
+public class PaySettingController : ConfigController<PaySetting>
+{
+    /// <summary>执行前。可用于定制字段展示</summary>
+    public override void OnActionExecuting(ActionExecutingContext filterContext)
+    {
+        // 动态设置下拉选项
+        var list = GetMembers(typeof(PaySetting));
+        var df = list.FirstOrDefault(e => e.Name == "PayChannel");
+        if (df != null)
+        {
+            df.DataSource = e => new Dictionary<String, String>
+            {
+                ["Alipay"] = "支付宝",
+                ["WechatPay"] = "微信支付",
+                ["UnionPay"] = "银联支付",
+            };
+        }
+
+        base.OnActionExecuting(filterContext);
+
+        // 自定义导航视图（可选）
+        PageSetting.NavView = "_Object_Nav";
+    }
+
+    /// <summary>保存时触发。可用于保存后做业务处理</summary>
+    public override ActionResult Update(PaySetting obj)
+    {
+        var rs = base.Update(obj);
+
+        // 保存后的业务处理，如刷新缓存、通知其他服务等
+        PayService.RefreshConfig();
+
+        return rs;
+    }
+}
+```
+
+### Value 属性机制
+
+`ConfigController<T>` 继承自 `ObjectController<T>`，通过 `Value` 属性管理配置单例：
+
+- **get**：返回 `Config<T>.Current` 单例
+- **set**：调用 `cfg.Copy(value)` + `cfg.Save()`，而非直接替换单例引用，确保线程安全
+
+当配置类使用 `DbConfigProvider` 时，`Save()` 会将变更写回 Parameter 表，定时刷新机制确保其他实例自动同步。
+
+### 常用重写方法
+
+| 方法 | 用途 |
+|------|------|
+| `OnActionExecuting` | 定制字段描述、设置下拉数据源、控制导航视图 |
+| `Update(TConfig obj)` | 保存配置后执行业务逻辑（刷新缓存、修复菜单等） |
+| `GetMembers(type)` | 获取配置类的成员列表，可动态修改 `Description`/`DataSource` |
+
+---
 ## EntityController<T> 实体控制器
 
 ### 继承与装饰
@@ -404,6 +492,8 @@ var maxErr    = set.MaxLoginError;       // 登录失败上限（默认 5）
 - [ ] 覆盖视图路径是否与 `ThemeViewLocationExpander` 查找顺序严格一致
 - [ ] 自定义 Action 是否标注了 `[EntityAuthorize]` 或 `[AllowAnonymous]`
 - [ ] `CubeSetting.JwtSecret` 在生产环境中是否已配置为强密钥
+- [ ] 配置控制器是否标注了区域特性、`[DisplayName]` 和 `[Menu]`
+- [ ] 服务端配置类是否已通过 `DbConfigProvider` 切换到数据库存储
 
 ## 待确认问题
 
