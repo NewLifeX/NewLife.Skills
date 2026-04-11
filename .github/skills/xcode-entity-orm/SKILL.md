@@ -655,3 +655,4 @@ using var et3 = new EntityTransaction(dal);
 - `Delete(Expression, maximumRows)` 支持分表；`Delete(String)` 不支持，大表批量删除必须用前者。
 - `BatchInsert` 不触发 `Valid`，需手动调用 `list.Valid(true)` 后再批量插入。
 - `GetOrAdd` 内部用 `Monitor.TryEnter` 加锁，高并发统计场景务必用此方法代替手写判断。
+- 实体类在项目中的架构定位（两层 vs 三层、何时需要 Service 层），参见 `project-architecture` 技能。

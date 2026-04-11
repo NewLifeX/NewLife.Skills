@@ -48,6 +48,8 @@ cd NewLife.Skills
 
 | 技能目录 | 覆盖领域 |
 |---------|---------|
+| `project-architecture` | 项目架构分层：两层起步、按需渐进三层、充血模型 |
+| `testing-strategy` | XCode 测试策略：SQLite 轻量集成测试、零架构侵入、测试隔离 |
 | `xcode-entity-orm` | NewLife.XCode 实体 CRUD 开发 |
 | `xcode-data-modeling` | XCode Model.xml 数据建模 |
 | `cube-mvc-backend` | NewLife.Cube MVC 后台管理系统 |

@@ -64,6 +64,8 @@ dotnet new cube -n MyCompanyWeb
 dotnet add reference ../MyCompany.Data/MyCompany.Data.csproj
 ```
 
+> 📌 项目分层策略（两层起步、何时拆分数据层、何时引入服务层），参见 `project-architecture` 技能。
+
 ---
 
 ## Area 区域注册
