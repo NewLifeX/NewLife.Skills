@@ -77,6 +77,19 @@ var list5 = await User.FindAllAsync(User._.Status == 1, page);
 
 ## Biz 文件约定
 
+### 分部类架构
+
+在 XCode 体系中，每个数据表生成实体类时会产生**两个文件**，例如 `用户.cs` 和 `用户.Biz.cs`，它们是**同一个实体类**，通过 `partial`（分部类）技术拆分为两个文件：
+
+| 文件 | 别名 | 说明 | 重新生成时 |
+|------|------|------|------------|
+| `实体名.cs` | 数据类 | 自动生成的数据映射代码（属性、字段映射、索引定义等） | **会被覆盖** |
+| `实体名.Biz.cs` | 业务类 / Biz 文件 | 用户自定义的业务逻辑（查询方法、Valid 钩子、InitData 等） | **仅首次生成，不会被覆盖** |
+
+因此，**所有用户自定义的增删改查逻辑都应写在 Biz 文件中**，无需担心重新执行 `xcode` 生成实体类时被覆盖。
+
+### 核心规则
+
 所有数据层逻辑一律放在 `*.Biz.cs` 文件的 `#region 高级查询` 中。**外部调用方只传语义化参数**，不在外部拼接 `WhereExpression`。
 
 ### 方法形式选择
@@ -104,17 +117,33 @@ Search(业务过滤字段..., DateTime start, DateTime end, String? key, PagePar
 
 ### Biz 文件内的表达式简写
 
-在 Biz 类内部，可省略类名前缀直接用 `_`：
+在 Biz 类内部，可省略类名前缀直接用 `_`，代码简洁美观；而在外部代码中必须写 `ClassName._.FieldName`，代码臃肿、可读性差。更重要的是，**类似查询逻辑如果散落在外部各处，无法合并复用**，而集中在 Biz 文件中可以统一管理和维护。
 
 ```csharp
-// ✅ Biz 文件内部（推荐）
-var exp = _.UserId == userId;
-if (!keyword.IsNullOrEmpty()) exp &= _.Title.Contains(keyword.Trim());
-return FindAll(exp, page);
+// ✅ Biz 文件内部：简洁美观，查询逻辑集中管理
+public static IList<Conversation> Search(Int32 userId, String? keyword, PageParameter page)
+{
+    var exp = new WhereExpression();
+    if (userId > 0) exp &= _.UserId == userId;
+    if (!keyword.IsNullOrEmpty()) exp &= _.Title.Contains(keyword.Trim());
+    return FindAll(exp, page);
+}
 
-// ❌ 外部业务代码（避免在外部拼接表达式）
-var exp = Conversation._.UserId == userId;
+// ❌ 外部业务代码：臃肿、类名前缀重复、散落各处难以维护
+var exp = new WhereExpression();
+if (userId > 0) exp &= Conversation._.UserId == userId;
+if (!keyword.IsNullOrEmpty()) exp &= Conversation._.Title.Contains(keyword.Trim());
+var list = Conversation.FindAll(exp, p);
 ```
+
+**对比总结**：
+
+| 维度 | Biz 文件内部 | 外部业务代码 |
+|------|-------------|-------------|
+| 字段访问 | `_.Name` | `ClassName._.Name` |
+| 代码量 | 简洁紧凑 | 臃肿冗余 |
+| 可复用性 | 封装为方法，全局调用 | 散落各处，无法合并 |
+| 可维护性 | 查询逻辑集中修改 | 修改时需全局搜索替换 |
 
 ### 完整示例
 
@@ -155,6 +184,58 @@ partial class Conversation
 
     #endregion
 }
+```
+
+### AI 编码与重构指引
+
+**新写代码时**：所有根据字段查询数据的逻辑，都必须在 Biz 文件中封装查询方法（`FindByXxx` / `FindAllByXxx` / `Search`），外部调用方通过方法名传入语义化参数，不直接拼接 `WhereExpression`。
+
+**重构代码时**：遇到散落在实体类外部的字段查询（如 `ClassName._.Field == value`、外部拼接 `WhereExpression`），应当：
+1. 在对应实体的 Biz 文件中新建或复用已有的查询方法
+2. 将外部调用改为调用该查询方法
+
+**重构前**（查询散落在外部 Service/Controller 中）：
+
+```csharp
+// ❌ 在 OrderService 中直接拼接查询表达式
+public IList<Order> GetUserOrders(Int32 userId, String? keyword)
+{
+    var exp = new WhereExpression();
+    exp &= Order._.UserId == userId;
+    exp &= Order._.Status > 0;
+    if (!keyword.IsNullOrEmpty()) exp &= Order._.OrderNo.Contains(keyword.Trim());
+    return Order.FindAll(exp, null);
+}
+```
+
+**重构后**（查询封装到 Biz 文件，外部改为调用）：
+
+```csharp
+// ✅ Order.Biz.cs 内
+partial class Order
+{
+    #region 高级查询
+
+    /// <summary>搜索订单列表</summary>
+    /// <param name="userId">用户编号，0 不过滤</param>
+    /// <param name="key">订单号关键字，空时不过滤</param>
+    /// <param name="page">分页参数</param>
+    /// <returns>订单列表，不存在时返回空列表</returns>
+    public static IList<Order> Search(Int32 userId, String? key, PageParameter? page)
+    {
+        var exp = new WhereExpression();
+        if (userId > 0) exp &= _.UserId == userId;
+        exp &= _.Status > 0;
+        if (!key.IsNullOrEmpty()) exp &= _.OrderNo.Contains(key.Trim());
+        return FindAll(exp, page);
+    }
+
+    #endregion
+}
+
+// ✅ OrderService 中调用
+public IList<Order> GetUserOrders(Int32 userId, String? keyword)
+    => Order.Search(userId, keyword, null);
 ```
 
 ## 脏字段追踪

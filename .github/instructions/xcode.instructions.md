@@ -383,6 +383,8 @@ var user = User.FindByKeyWithCache(1);
 
 ### 5.6 Biz 文件数据层逻辑规范
 
+**分部类架构**：每个实体类通过 `partial` 拆分为两个文件——`实体名.cs`（数据类，`xcode` 重新生成时**会被覆盖**）和 `实体名.Biz.cs`（业务类，仅首次生成，**不会被覆盖**）。因此，所有用户自定义的查询、验证、业务逻辑安全地写在 Biz 文件中，无需担心重新生成被覆盖。
+
 **核心理念**：所有需要人工编写的数据层逻辑代码，一律放在实体类的 Biz 文件（`*.Biz.cs`）中，包括**高级查询**（`#region 高级查询`）与**添删改查重载**等。外部调用方只传语义化参数，不感知 `WhereExpression` 拼接细节。
 
 #### 高级查询封装选择
@@ -413,15 +415,15 @@ Search(业务过滤字段..., DateTime start, DateTime end, String? key, PagePar
 
 #### 表达式简写
 
-在 Biz 文件的静态方法内部，可**省略类名前缀**：
+在 Biz 文件的静态方法内部，可**省略类名前缀**直接用 `_` 访问字段，代码简洁美观；而在外部代码中必须写 `ClassName._.FieldName`，代码臃肿且可读性差。更重要的是，**类似查询逻辑散落在外部各处无法合并复用**，集中在 Biz 文件中统一管理更易维护。
 
 ```csharp
-// ✅ 推荐（Biz 文件内部）
+// ✅ 推荐（Biz 文件内部）——简洁美观，查询逻辑集中管理
 var exp = _.UserId == userId;
 if (!keyword.IsNullOrEmpty()) exp &= _.Title.Contains(keyword.Trim());
 return FindAll(exp, page);
 
-// ❌ 避免（外部业务代码中拼接表达式）
+// ❌ 避免（外部业务代码中拼接表达式）——臃肿、散落、难维护
 var exp = Conversation._.UserId == userId;
 if (!keyword.IsNullOrEmpty()) exp &= Conversation._.Title.Contains(keyword.Trim());
 var list = Conversation.FindAll(exp, p);
@@ -644,7 +646,13 @@ xcode Order.xml
 3. 如需修改生成的代码，应修改 Model.xml 后重新生成
 4. 业务逻辑写在 `.Biz.cs` 文件中
 
-### 10.3 边界意识
+### 10.3 查询代码编写与重构
+
+- **新写代码**：所有根据字段查询数据的逻辑，都必须在 Biz 文件（`*.Biz.cs`）中封装为 `FindByXxx` / `FindAllByXxx` / `Search` 方法，外部调用方传入语义化参数，不直接拼接 `WhereExpression`
+- **重构代码**：遇到散落在实体类外部的字段查询（如 `ClassName._.Field == value`、外部拼接 `WhereExpression`），应当提取到对应实体的 Biz 文件中封装为查询方法，外部改为调用该方法
+- **复用优先**：提取前先检查 Biz 文件中是否已有可复用的查询方法，避免重复封装
+
+### 10.4 边界意识
 
 - 数据模型和实体操作 → 本指令
 - Web 控制器和界面 → `cube.instructions.md`
