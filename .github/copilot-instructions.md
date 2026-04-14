@@ -21,6 +21,7 @@
 | 加密/安全/Hash/MD5/SHA/AES/SM4/RSA/JWT/SecurityHelper/TokenProvider/`NewLife.Security` 命名空间 | `security.instructions.md` |
 | 远程调用/ApiHttpClient/ApiClient/ApiServer/负载均衡/LoadBalancer/RPC/HTTP客户端/`NewLife.Remoting` 命名空间 | `remoting.instructions.md` |
 | 配置/Config/IConfigProvider/HttpConfigProvider/CommandParser/配置中心/`NewLife.Configuration` 命名空间 | `configuration.instructions.md` |
+| 前端美化/界面美化/UI美化/UI优化/CSS美化/主题定制/暗黑模式/Dark Mode/响应式布局/Bootstrap美化/视觉优化/视觉打磨/设计系统/Design Token/Tailwind/组件库主题/表格美化/表单美化/导航美化/仪表盘美化/弹窗美化/空状态/错误页面/骨架屏 | 无（使用前端美化系列技能） |
 
 **自动匹配指令**（无需触发，按 `applyTo` 路径自动生效）：`caching`、`serialization`、`security`、`remoting`、`configuration` 这 5 个指令文件同时配置了 `applyTo` 模式，编辑对应目录下的文件时 VS Code 会自动加载。
 

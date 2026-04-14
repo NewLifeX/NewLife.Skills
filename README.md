@@ -27,7 +27,7 @@ cd NewLife.Skills
 
 ### Skills（技能）
 
-存放于 `.github/skills/`，每个技能一个子目录，含 `SKILL.md` 详细指南。共 59 个技能文件夹。
+存放于 `.github/skills/`，每个技能一个子目录，含 `SKILL.md` 详细指南。共 71 个技能文件夹。
 
 **快速使用指南（usage 类）**——按需快速上手，代码示例为主：
 
@@ -43,6 +43,23 @@ cd NewLife.Skills
 | `timer-scheduling` | TimerX/Cron 高级定时调度 |
 | `security` | Hash/AES/SM4/RSA/JWT/TokenProvider 安全与加密 |
 | `type-conversion` | ToInt/ToBoolean/StringHelper/Pool.StringBuilder 类型转换与工具 |
+
+**前端美化指南（frontend 类）**——从设计理论到组件级美化，共 12 个技能文件夹：
+
+| 技能目录 | 覆盖领域 |
+|---------|---------|
+| `frontend-design-system` | 设计令牌体系：色彩/字号/间距/圆角/投影/动画 |
+| `frontend-dark-theme` | 亮色/暗色主题设计与实现 |
+| `frontend-responsive-layout` | 响应式布局与导航适配 |
+| `frontend-tailwind-patterns` | Tailwind CSS 现代模式集：按钮/卡片/毛玻璃/微动画 |
+| `frontend-theme-customization` | 五大组件库主题深度定制（Element Plus/Ant Design/Arco/TDesign/Naive UI） |
+| `frontend-table-styling` | 后台表格美化：表头/斑马纹/Badge/操作列/空状态/骨架屏 |
+| `frontend-form-styling` | 表单美化：浮动标签/校验反馈/分步表单/密码强度 |
+| `frontend-navigation-styling` | 导航美化：侧边栏/顶栏/面包屑/标签页路由 |
+| `frontend-card-dashboard` | 仪表盘与卡片布局：统计卡/图表容器/排行榜 |
+| `frontend-modal-feedback` | 弹窗与反馈：模态框/Toast/空状态页/错误页 |
+| `frontend-bootstrap-modernize` | Bootstrap 3/4 现代化美化（Cube MVC 专用） |
+| `frontend-visual-polish` | 视觉精修检查清单（20+ 项上线前打磨） |
 
 **深度设计指南（architecture 类）**——涵盖 XCode/Cube/Redis/MQTT/Net/序列化/安全/定时器等所有领域，共 49 个技能文件夹。代表性技能：
 
