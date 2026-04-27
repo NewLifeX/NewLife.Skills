@@ -26,9 +26,8 @@
 | 触发关键词 | 指令文件 |
 |---|---|
 | XCode/实体生成/Model.xml/数据库 CRUD/`NewLife.XCode`/`*.xcode.xml`/项目名含 `.Data`/`XCode.*` 命名空间/修改任意 `.xml` 模型文件 | `xcode.instructions.md` |
-| 新建系统/新建项目/新增模块/需求整理/需求文档/需求分析/架构设计/技术方案/功能拆分/任务分解/迭代开发/PRD/做一个系统/做一个平台/批量开发/自治模式 | `development.instructions.md` |
-
-> Cube 后台开发（`NewLife.Cube`）暂未提供独立指令文件，深度规范请加载 `cube-mvc-backend` skill。
+| Cube/魔方/Web开发/后台管理/`NewLife.Cube` 引用/`NewLife.Cube.*` 命名空间/EntityController/Area/区域控制器 | `cube.instructions.md` |
+| 新建系统/新建项目/新增模块/需求整理/需求文档/需求分析/架构设计/技术方案/功能拆分/任务分解/迭代开发/PRD/做一个系统/做一个平台/批量开发/自治模式/全部搞完/接着做 | `development.instructions.md` |
 
 ---
 
@@ -178,7 +177,7 @@ using var _ = _lock.AcquireLock();
 
 加载标注 → 触发检查（第 1 节） → 检索（**优先复用**现有实现 + XML 注释） → 评估（公共 API/兼容性/性能） → 方案 → 实施 → 验证 → 必要时 AskQuestions 确认 → 说明
 
-- **触发检查**：开始工作前必须完成
+- **触发检查**：开始工作前必须完成，遗漏专用指令将导致输出不符合要求
 - **实施**：完成主任务；顺带修复明显缺陷；顺带简化重复代码；保留原注释与结构
 - **验证**：代码变更必须编译通过；找到相关测试则运行；仅文档变更可跳过
 
@@ -271,18 +270,12 @@ AI 容易犯但在本项目影响严重的错误：
 
 | 技能 | 适用场景 |
 |---|---|
-| `xcode-data-modeling` | 设计 Model.xml、xcode 命令生成实体 |
-| `xcode-sharding-etl` | XCode 分库分表、ETL 数据同步 |
-| `cube-mvc-backend` | Cube 后台管理系统、字段定制、视图覆盖 |
-| `network-server-sessions` | NetServer/NetSession 高性能服务器架构 |
-| `testing-strategy` | XCode + SQLite 轻量集成测试 |
-| `benchmark-testing` | BenchmarkDotNet 流程化性能测试 |
-| `project-architecture` | 两层/三层架构选型、充血模型 |
-| `development-workflow` | 需求拆分、迭代开发流程 |
-| `coding-standards` | 编码规范的元规则（写新规范时参考） |
-| `compatibility-checks` | 多目标框架兼容性审查 |
+| `xcode-data-modeling` | 设计 Model.xml、xcode 命令生成实体（触发 xcode.instructions.md 后进一步参考） |
+| `cube-mvc-backend` | Cube 后台管理深度定制：字段操作速查、视图覆盖、ConfigController（触发 cube.instructions.md 后进一步参考） |
+| `project-architecture` | 两层/三层架构选型、充血模型、Service 是否抽取的判断 |
+| `benchmark-testing` | BenchmarkDotNet 流程化性能测试、基准报告编写 |
 
-> 完整目录请查看 `.github/skills/`。**未列入上表的目录均为已废弃**，不应主动加载。
+> **未列入上表的目录均为已废弃**，不应主动加载。
 
 ### Agents（用户主动 @ 调用）
 
