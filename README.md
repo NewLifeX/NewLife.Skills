@@ -1,117 +1,112 @@
-# NewLife Skills
+# NewLife.Skills
 
-**NewLife Copilot 资产统一管理库**——集中管理 NewLife 系列项目所有可复用的 Copilot 资产：技能、指令、提示词、智能体。
+**NewLife Copilot 资产统一管理库**——集中管理 NewLife 系列项目可复用的 Copilot 资产：全局指令、专用指令、技能、智能体。
 
-克隆到任意机器后，执行一条脚本即可将全部资产安装到 VS Code 用户数据目录，**无需在每个项目里各放一份 `.github`**。
+克隆到任意机器后执行一条脚本即可安装到 VS Code 用户数据目录，**无需在每个项目放一份 `.github`**。
+
+---
+
+## 设计理念
+
+资产采用**最小化策略**，分三层承担不同职责：
+
+| 层级 | 载体 | 内容 | 维护成本 |
+|---|---|---|---|
+| **Tier 1** | NuGet 包 XML 注释 | 类与成员的「如何使用」 | 跟代码一起维护 |
+| **Tier 2** | 本仓库全局 instructions | NewLife 反常规约定（硬约束） | 极低，集中维护 |
+| **Tier 3** | 本仓库 skill / agent | 流程类、架构决策类、跨组件取舍 | 仅必要项 |
+
+**判定原则**：能由 XML 注释或通用知识覆盖的，不做 skill；能由全局 instructions 承担的，不做专用 instructions。
 
 ---
 
 ## 快速开始
 
-### 安装到本机（Win10/Win11 + VS Code + GitHub Copilot）
-
 ```powershell
-# 克隆此仓库
 git clone https://github.com/NewLifeX/NewLife.Skills.git
 cd NewLife.Skills
-
-# 安装全部 Copilot 资产到用户级目录
 .\scripts\install-copilot-assets.ps1
 ```
 
-安装完成后**重启 VS Code**，所有项目即可使用以下资产，无需在每个项目中放 `.github` 目录。
+安装完成后**重启 VS Code**，所有项目即可使用全部资产。
+
+### 更新
+
+直接重新执行 `install-copilot-assets.ps1`。脚本基于 manifest 自动同步：
+
+- 新资产 → 复制
+- 仓库已删除但上次安装过的 → **自动清理**（孤儿清理）
+- 不会触碰 manifest 之外的文件
+
+### 首次从旧脚本迁移
+
+如果之前用过旧版安装脚本（没有 manifest），磁盘上残留了大量旧 skill / instructions / agent，加 `-AssumeAllOrphans` 一次性清理：
+
+```powershell
+# 先预览将清理什么
+.\scripts\install-copilot-assets.ps1 -AssumeAllOrphans -WhatIf
+
+# 确认后执行
+.\scripts\install-copilot-assets.ps1 -AssumeAllOrphans
+```
+
+### 卸载
+
+```powershell
+.\scripts\install-copilot-assets.ps1 -Uninstall
+```
 
 ---
 
 ## 资产清单
 
-### Skills（技能）
+### 全局指令
 
-存放于 `.github/skills/`，每个技能一个子目录，含 `SKILL.md` 详细指南。共 71 个技能文件夹。
+[.github/copilot-instructions.md](.github/copilot-instructions.md)——所有 NewLife 项目通用的硬约束：加载标注、兼容性、命名/类型/风格规范、防御性注释、内置工具优先、工作流。
 
-**快速使用指南（usage 类）**——按需快速上手，代码示例为主：
+### 专用指令（按关键词触发加载）
 
-| 技能目录 | 覆盖领域 |
-|---------|---------|
-| `caching` | ICache/MemoryCache/Redis 统一缓存接口 |
-| `logging-tracing` | ILog/XTrace 日志与 ITracer/DefaultTracer 链路追踪 |
-| `networking` | NetServer/NetSession TCP/UDP/WebSocket 网络编程 |
-| `serialization` | JSON/Binary/Span/CSV 序列化 |
-| `configuration` | Config&lt;T&gt;/IConfigProvider/HttpConfigProvider 配置管理 |
-| `http-client` | ApiHttpClient 多节点 HTTP 客户端与负载均衡 |
-| `dependency-injection` | ObjectContainer/Host/Plugin/Actor 依赖注入与宿主 |
-| `timer-scheduling` | TimerX/Cron 高级定时调度 |
-| `security` | Hash/AES/SM4/RSA/JWT/TokenProvider 安全与加密 |
-| `type-conversion` | ToInt/ToBoolean/StringHelper/Pool.StringBuilder 类型转换与工具 |
-
-**前端美化指南（frontend 类）**——从设计理论到组件级美化，共 12 个技能文件夹：
-
-| 技能目录 | 覆盖领域 |
-|---------|---------|
-| `frontend-design-system` | 设计令牌体系：色彩/字号/间距/圆角/投影/动画 |
-| `frontend-dark-theme` | 亮色/暗色主题设计与实现 |
-| `frontend-responsive-layout` | 响应式布局与导航适配 |
-| `frontend-tailwind-patterns` | Tailwind CSS 现代模式集：按钮/卡片/毛玻璃/微动画 |
-| `frontend-theme-customization` | 五大组件库主题深度定制（Element Plus/Ant Design/Arco/TDesign/Naive UI） |
-| `frontend-table-styling` | 后台表格美化：表头/斑马纹/Badge/操作列/空状态/骨架屏 |
-| `frontend-form-styling` | 表单美化：浮动标签/校验反馈/分步表单/密码强度 |
-| `frontend-navigation-styling` | 导航美化：侧边栏/顶栏/面包屑/标签页路由 |
-| `frontend-card-dashboard` | 仪表盘与卡片布局：统计卡/图表容器/排行榜 |
-| `frontend-modal-feedback` | 弹窗与反馈：模态框/Toast/空状态页/错误页 |
-| `frontend-bootstrap-modernize` | Bootstrap 3/4 现代化美化（Cube MVC 专用） |
-| `frontend-visual-polish` | 视觉精修检查清单（20+ 项上线前打磨） |
-
-**深度设计指南（architecture 类）**——涵盖 XCode/Cube/Redis/MQTT/Net/序列化/安全/定时器等所有领域，共 49 个技能文件夹。代表性技能：
-
-| 技能目录 | 覆盖领域 |
-|---------|---------|
-| `project-architecture` | 项目架构分层：两层起步、按需渐进三层、充血模型 |
-| `testing-strategy` | XCode 测试策略：SQLite 轻量集成测试、零架构侵入、测试隔离 |
-| `xcode-entity-orm` | NewLife.XCode 实体 CRUD 开发 |
-| `xcode-data-modeling` | XCode Model.xml 数据建模 |
-| `cube-mvc-backend` | NewLife.Cube MVC 后台管理系统 |
-| `redis-client` | NewLife.Redis 高性能 Redis 客户端 |
-| `network-server-sessions` | NetServer/NetSession 高性能网络服务器 |
-| `cache-provider-architecture` | ICache 统一缓存接口与分布式锁 |
-| `security-crypto-patterns` | Hash/AES/RSA/JWT 加密安全 |
-| `stardust-platform` | 星尘分布式服务平台接入 |
-| `agent-service` | NewLife.Agent 跨平台系统服务 |
-| `benchmark-testing` | BenchmarkDotNet 性能基准测试 |
-
-### Instructions（指令）
-
-存放于 `.github/instructions/`，触发关键词时 Copilot 自动加载：
+存放于 [.github/instructions/](.github/instructions)：
 
 | 文件 | 触发场景 |
-|------|---------|
-| `xcode.instructions.md` | XCode / 数据库 / Model.xml |
-| `net.instructions.md` | NetServer / 网络编程 |
-| `benchmark.instructions.md` | 性能测试 / BenchmarkDotNet |
-| `development.instructions.md` | 新建系统 / 需求分析 / 架构设计 |
-| `caching.instructions.md` | ICache / MemoryCache / Redis 缓存 |
-| `serialization.instructions.md` | JSON / Binary 序列化 |
-| `security.instructions.md` | 加密 / Hash / JWT / RSA |
-| `remoting.instructions.md` | ApiHttpClient / RPC / 负载均衡 |
-| `configuration.instructions.md` | Config / IConfigProvider / 配置中心 |
+|---|---|
+| `xcode.instructions.md` | XCode / Model.xml / 数据库 ORM |
+| `development.instructions.md` | 新建系统 / 需求分析 / 架构设计 / 多迭代开发 |
 
-### Prompts（提示词）
+### Skills（按需加载）
 
-存放于 `.github/prompts/`：
+存放于 [.github/skills/](.github/skills)，每个技能一个子目录：
+
+| 技能 | 适用场景 |
+|---|---|
+| `xcode-data-modeling` | 设计 Model.xml、xcode 命令生成实体 |
+| `xcode-sharding-etl` | XCode 分库分表、ETL 数据同步 |
+| `cube-mvc-backend` | Cube 后台管理系统、字段定制、视图覆盖 |
+| `network-server-sessions` | NetServer/NetSession 高性能服务器架构 |
+| `testing-strategy` | XCode + SQLite 轻量集成测试 |
+| `benchmark-testing` | BenchmarkDotNet 流程化性能测试 |
+| `project-architecture` | 两层/三层架构选型、充血模型 |
+| `development-workflow` | 需求拆分、迭代开发流程 |
+| `coding-standards` | 编码规范的元规则（写新规范时参考） |
+| `compatibility-checks` | 多目标框架兼容性审查 |
+
+### Agents（用户主动 `@` 调用）
+
+存放于 [.github/agents/](.github/agents)：
+
+| Agent | 用途 |
+|---|---|
+| `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
+| `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
+| `code-review` | 按 NewLife 规范审查代码 |
+
+### Prompts
+
+存放于 [.github/prompts/](.github/prompts)：
 
 | 文件 | 用途 |
-|------|------|
+|---|---|
 | `doc-writer.prompt.md` | 为 C# 代码生成高质量 Markdown 文档 |
-
-### Agents（智能体）
-
-存放于 `.github/agents/`：
-
-| 文件 | 用途 |
-|------|------|
-| `newlife-expert.agent.md` | NewLife 全生态技术专家 |
-| `code-review.agent.md` | NewLife 代码审查（8维度检查） |
-| `project-init.agent.md` | NewLife 新项目初始化助手 |
-| `release-prep.agent.md` | 开源库月度发版准备（ChangeLog/版本号/README） |
 
 ---
 
@@ -119,35 +114,35 @@ cd NewLife.Skills
 
 ```text
 .github/
-  copilot-instructions.md      # NewLife 全局 Copilot 协作规范（含编码规范）
-  agents/                      # 智能体定义 (*.agent.md)  → chatmodes/
-  instructions/                # 场景指令 (*.instructions.md)  → prompts/
-  prompts/                     # 提示词模板 (*.prompt.md)  → prompts/
-  skills/                      # 技能文件夹，全部为 <name>/SKILL.md 格式 → prompts/skills/
-docs/                          # 分析文档、设计说明
+  copilot-instructions.md   # 全局 Copilot 协作规范（必须遵守）
+  instructions/             # 专用指令（关键词触发）
+  skills/                   # 技能（按需加载）
+  agents/                   # 智能体（@ 调用）
+  prompts/                  # 提示词模板
+docs/                       # 设计文档、技能体系说明
 scripts/
-  install-copilot-assets.ps1   # 安装脚本（主入口）
-  sync-skills-to-user.ps1      # 旧名称兼容包装器
+  install-copilot-assets.ps1
 ```
 
 ---
 
-## 安装说明
+## 安装路径
 
-`install-copilot-assets.ps1` 将资产复制到以下 VS Code 用户数据目录：
+`install-copilot-assets.ps1` 将资产复制到：
 
-| 资产类型 | 目标路径 |
-|---------|---------|
-| Skills (`<name>/SKILL.md` 文件夹) | `%APPDATA%\Code\User\prompts\skills\` |
-| Instructions (`*.instructions.md`) | `%APPDATA%\Code\User\prompts\` |
-| Prompts (`*.prompt.md`) | `%APPDATA%\Code\User\prompts\` |
-| Agents (`*.agent.md`) | `%APPDATA%\Code\User\prompts\` |
-| 全局指令 (`copilot-instructions.md`) | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
+| 资产 | 目标 |
+|---|---|
+| Skills (`<name>/SKILL.md`) | `%APPDATA%\Code\User\prompts\skills\` |
+| Instructions / Prompts / Agents | `%APPDATA%\Code\User\prompts\` |
+| 全局指令 | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
 
 ---
 
-## 维护说明
+## 维护原则
 
-1. 从其他 NewLife 仓库（如 `.github/` 目录）学到新规范后，在此库中统一更新。
-2. 更新后重新运行 `install-copilot-assets.ps1` 即可覆盖更新本机资产。
-3. 提交到 Git，其他机器 `git pull` 后再次运行脚本即可同步。
+1. **30 天淘汰制**：连续 30 天未触发的 skill / instructions 进入删除候选
+2. **搬运型禁止**：能由 XML 注释或通用知识覆盖的内容不做 skill
+3. **单一事实源**：API 用法首选 XML 注释；架构决策首选 skill；硬约束首选全局 instructions
+4. **改动验证**：修改后在真实项目随机提一个相关问题，观察「已加载」标注是否符合预期
+
+详见 [docs/skill-system-design.md](docs/skill-system-design.md)。

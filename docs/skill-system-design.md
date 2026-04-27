@@ -4,7 +4,7 @@
 
 ## 1. 技能文件是否应该分目录，是否需要多级目录？
 
-结论：**应该分目录，但要区分“运行态目录”和“知识态目录”。**
+结论：**应该分目录，但要区分"运行态目录"和"知识态目录"。**
 
 ### 1.1 运行态目录
 
@@ -14,11 +14,11 @@
 .github/skills/<skill-name>/SKILL.md
 ```
 
-这一层建议保持**扁平化**，不要做太深的多级目录。原因有三：
+这一层建议保持**扁平**，不要做太深的多级目录。原因有三：
 
 - 官方技能发现机制围绕 `skills/<name>/SKILL.md` 设计。
 - 扁平目录便于同步到用户级技能目录。
-- 过深目录会让“技能名”和“分类名”耦合，后续迁移困难。
+- 过深目录会让"技能名"和"分类名"耦合，后续迁移困难。
 
 ### 1.2 知识态目录
 
@@ -46,7 +46,7 @@ docs/
 
 ## 2. 怎样兼容 Copilot，并支持每天自动同步？
 
-建议采用“双层架构”：
+建议采用"双层架构"：
 
 ### 2.1 源仓库层
 
@@ -173,7 +173,7 @@ description: 'Capture coding conventions, directory habits, naming patterns, and
 
 - 合并重复条目
 - 解决冲突表述
-- 区分“稳定规则”和“局部例外”
+- 区分"稳定规则"和"局部例外"
 - 输出新的统一版本
 
 ### 4.3 功能型技能
@@ -212,7 +212,7 @@ description: 'Capture coding conventions, directory habits, naming patterns, and
 - 怎样写一个好技能
 - 怎样拆分技能
 - 怎样命名技能
-- 怎样评估技能是否过大
+- 怎样评估技能是否过多
 - 怎样淘汰陈旧技能
 
 这里面，**文档规范技能**当然值得单独成类，而且通常是高频高价值技能。
@@ -241,9 +241,9 @@ description: 'Capture coding conventions, directory habits, naming patterns, and
 
 不适合做：
 
-- 你的长期个人知识资产库
-- 跨仓库复用的方法论中心
-- 需要精心编排和版本管理的规范体系
+- 你的长期个人知识资产。
+- 跨仓库复用的方法论中枢。
+- 需要精心编排和版本管理的规范体系。
 
 ### 5.3 推荐关系
 
@@ -254,12 +254,12 @@ description: 'Capture coding conventions, directory habits, naming patterns, and
 
 ### 5.4 最佳整合方式
 
-不要直接“把 Memory 当技能库”，而是做成这样的闭环：
+不要直接"把 Memory 当技能库"，而是做成这样的闭环：
 
 1. 在日常 Copilot 使用中，让 Memory 自动积累。
 2. 定期把高价值记忆转成候选知识。
-3. 通过“融合型技能”合并到 Git 管理的技能库。
-4. 再由脚本把技能库同步回 Copilot 可用目录。
+3. 通过"融合型技能"合并到 Git 管理的技能库。
+4. 再由脚本把技能库同步到 Copilot 可用目录。
 
 这才是比较稳、也更适合长期演进的方案。
 
@@ -280,10 +280,12 @@ description: 'Capture coding conventions, directory habits, naming patterns, and
 11. `generate-onboarding-guide`
 12. `maintain-skill-library`
 
-## 你现在最值得马上做的事
+## 你现在最值得马上做的
 
 1. 确定技能目录主结构。
 2. 先写 3 个核心技能样板。
 3. 用 1~2 个真实仓库做捕获实验。
-4. 验证“捕获 → 融合 → 同步”闭环。
+4. 验证"捕获 → 融合 → 同步"闭环。
 5. 再逐步批量扩展。
+
+---

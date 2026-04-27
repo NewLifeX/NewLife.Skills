@@ -1,29 +1,34 @@
 # NewLife Copilot 协作指令
 
-适用于 NewLife 系列全部 C#/.NET 仓库，本文件可随仓库/指令目录一起拷贝到其他项目直接复用。存在本文件则必须遵循。**简体中文回复。**
-通用 C# 最佳实践（设计模式、SOLID、健壮性等）AI 已知，此处不赘述，**仅列出组织专属规则与反常规约定**。
+适用于 NewLife 系列全部 C#/.NET 仓库，本文件可随仓库/指令目录一起拷贝到其他项目直接复用。**简体中文回复。**
+通用 C# 最佳实践（设计模式、SOLID、健壮性等）AI 已知，**仅列出组织专属规则与反常规约定**。
 
 ---
 
-## 1. 专用指令（前置检查，必须执行）
+## 0. 加载标注（强制）
 
-**开始任何任务前，必须先将用户请求与下表触发信号逐行匹配。命中则立即用 `get_file` 读取 `.github/instructions/{指令文件}`，读取成功后遵循其中全部规则。未命中任何行才跳过。**
+**每次回答开头第一行**必须输出加载状态，便于用户验证哪些资产真正生效：
 
-| 触发信号（用户请求含以下任意关键词即命中） | 指令文件 |
-|---------|---------|
-| XCode/实体生成/Model.xml/数据库 CRUD/`NewLife.XCode` 引用/`*.xcode.xml`/项目名含 `.Data`/`XCode.*` 命名空间/用户提及修改任意 `.xml` 文件 | `xcode.instructions.md` |
-| Cube/魔方/Web开发/`NewLife.Cube` 引用/`NewLife.Cube.*` 命名空间 | `cube.instructions.md` |
-| 性能测试/基准测试/压力测试/压测/BenchmarkDotNet/Benchmark/benchmark/吞吐量评估/性能分析/性能对比/性能报告/速度对比/速度测试/内存分配/perf/性能优化测试/做性能/跑分/测试报告 | `benchmark.instructions.md` |
-| NetServer/NetSession/网络服务器/网络客户端/Socket服务/TCP服务/UDP服务/`NewLife.Net` 引用/`NewLife.Net.*` 命名空间/ISocketClient/ISocketRemote/CreateRemote/StandardCodec/LengthFieldCodec/管道编解码/网络编程/Echo服务/网络会话/长连接/粘包拆包 | `net.instructions.md` |
-| 新建系统/新建项目/新增模块/需求整理/需求文档/需求分析/架构设计/技术方案/功能清单/功能拆分/任务分解/迭代开发/迭代计划/验收/PRD/用户故事/做一个系统/做一个平台/开发流程/全部搞完/批量开发/自治模式/一次性做完/继续处理/接着做 | `development.instructions.md` |
-| 缓存/ICache/MemoryCache/Redis缓存/ICacheProvider/缓存设计/`NewLife.Caching` 命名空间 | `caching.instructions.md` |
-| 序列化/JSON/Binary/JsonHelper/序列化设计/SpanSerializer/CSV导出/`NewLife.Serialization` 命名空间 | `serialization.instructions.md` |
-| 加密/安全/Hash/MD5/SHA/AES/SM4/RSA/JWT/SecurityHelper/TokenProvider/`NewLife.Security` 命名空间 | `security.instructions.md` |
-| 远程调用/ApiHttpClient/ApiClient/ApiServer/负载均衡/LoadBalancer/RPC/HTTP客户端/`NewLife.Remoting` 命名空间 | `remoting.instructions.md` |
-| 配置/Config/IConfigProvider/HttpConfigProvider/CommandParser/配置中心/`NewLife.Configuration` 命名空间 | `configuration.instructions.md` |
-| 前端美化/界面美化/UI美化/UI优化/CSS美化/主题定制/暗黑模式/Dark Mode/响应式布局/Bootstrap美化/视觉优化/视觉打磨/设计系统/Design Token/Tailwind/组件库主题/表格美化/表单美化/导航美化/仪表盘美化/弹窗美化/空状态/错误页面/骨架屏 | 无（使用前端美化系列技能） |
+```
+> 已加载: instructions=[xxx,yyy], skills=[xxx], agent=xxx
+```
 
-**自动匹配指令**（无需触发，按 `applyTo` 路径自动生效）：`caching`、`serialization`、`security`、`remoting`、`configuration` 这 5 个指令文件同时配置了 `applyTo` 模式，编辑对应目录下的文件时 VS Code 会自动加载。
+- 未加载任何专用指令/技能时写 `instructions=[]`、`skills=[]`
+- 当前 agent 未指定时写 `agent=default`
+- 该行后空一行再开始正文，正文不得省略此标注
+
+---
+
+## 1. 专用指令（前置检查，命中即加载）
+
+开始任务前，将用户请求与下表关键词逐行匹配。**命中则立即用 `read_file` 读取 `.github/instructions/{指令文件}`**。未命中则跳过。
+
+| 触发关键词 | 指令文件 |
+|---|---|
+| XCode/实体生成/Model.xml/数据库 CRUD/`NewLife.XCode`/`*.xcode.xml`/项目名含 `.Data`/`XCode.*` 命名空间/修改任意 `.xml` 模型文件 | `xcode.instructions.md` |
+| 新建系统/新建项目/新增模块/需求整理/需求文档/需求分析/架构设计/技术方案/功能拆分/任务分解/迭代开发/PRD/做一个系统/做一个平台/批量开发/自治模式 | `development.instructions.md` |
+
+> Cube 后台开发（`NewLife.Cube`）暂未提供独立指令文件，深度规范请加载 `cube-mvc-backend` skill。
 
 ---
 
@@ -31,14 +36,27 @@
 
 检索优先、风格一致、兼容友好、**主动优化**。
 发现明显缺陷（资源泄漏、空引用、逻辑错误）时主动修复；优化请求时深入分析，不做表面工作。
-改动较小直接做并说明；改动较大（涉及公共 API 或大范围重构）先列方案询问确认。
+小改动直接做并说明；大改动（公共 API/大范围重构）先列方案询问确认。
+
+**最高杠杆原则**：优先信任 NewLife NuGet 包的 XML 注释。AI 跳转到类型定义即可看到 `<summary>` / `<remarks>` / `<example>`，无需 skill 复述用法。Skill 只承担"流程类、架构决策类、跨多个组件的取舍"。
+
+### 2.1 未知 API 的强制查询步骤
+
+当用户提到某个 NewLife 类型（如 `CsvFile` / `ApiHttpClient` / `MemoryCache` / `TimerX` / `XCode.Entity` 等），或代码中需要使用某个 NewLife 类型而你**不确定其用法**时，**必须按以下顺序查询，禁止凭印象编造 API**：
+
+1. **优先查 XML 注释**：用 `vscode_listCodeUsages` 或 `grep_search` 在工作区或 NuGet 包缓存（`%USERPROFILE%\.nuget\packages\<包名>\<版本>\lib\<tfm>\*.xml`）定位类型，读取其 `<summary>` / `<remarks>` / `<example>`
+2. **次选搜索源码**：若工作区包含对应 NewLife 仓库（如 `D:\X\NewLife.Core`），直接 `grep_search` 类型名定位源码
+3. **再次官方文档**：访问 https://newlifex.com 或 GitHub 仓库 README
+4. **最后才加载 skill**：仅当上述都不足以回答时（一般是流程/架构问题），考虑加载相关 skill
+
+> **禁止行为**：未经查询直接给出 API 调用示例。如果跳过 1~3 步直接编代码，极易虚构方法签名、参数顺序、返回类型。
 
 ---
 
 ## 3. 兼容性约束（极重要）
 
-- **语言版本**：当前为 **C# 14**（`<LangVersion>latest</LangVersion>`），最大化使用最新语法糖（switch 表达式、集合表达式 `[]`、`?.`/`??`/`??=`、模式匹配、目标类型 `new`、record 等）
-- **框架版本**：新增 API 前，先查看当前项目 `.csproj` 的 `<TargetFrameworks>` 配置，**只需满足已声明版本的兼容性**，无需对所有历史版本降级。若包含 `net45`/`netstandard2.0` 等低版本，再提供条件编译降级实现。
+- **语言版本**：当前为 **C# 14**（`<LangVersion>latest</LangVersion>`），最大化使用现代语法（switch 表达式、集合表达式 `[]`、`?.`/`??`/`??=`、模式匹配、目标类型 `new`、record 等）
+- **框架版本**：新增 API 前先看当前项目 `.csproj` 的 `<TargetFrameworks>`，**只需满足已声明版本的兼容性**。若包含 `net45`/`netstandard2.0` 等低版本，再用条件编译降级
 - **禁止高版本专属 BCL API**（低版本项目）：❌ `ArgumentNullException.ThrowIfNull()` → ✅ `if (x == null) throw new ArgumentNullException(nameof(x));`
 - **条件编译符号**：`NETFRAMEWORK`、`NETSTANDARD2_0`、`NETCOREAPP`、`NET5_0_OR_GREATER`、`NET6_0_OR_GREATER`、`NET8_0_OR_GREATER`
 
@@ -53,34 +71,33 @@
 
 ### 4.2 命名
 
-| 成员类型 | 规则 | 示例 |
-|---------|------|------|
+| 成员 | 规则 | 示例 |
+|---|---|---|
 | 类型/公共成员 | PascalCase | `UserService`、`GetName()` |
 | 参数/局部变量 | camelCase | `userName`、`count` |
 | 私有字段 | `_camelCase` | `_cache`、`_instance` |
-| 扩展方法类 | `xxxHelper` 或 `xxxExtensions` | `StringHelper`、`CollectionExtensions` |
+| 扩展方法类 | `xxxHelper` 或 `xxxExtensions` | `StringHelper` |
 
 ### 4.3 代码风格
 
 - **命名空间**：file-scoped namespace
 - **单文件**：每文件一个主要公共类型；较大平台差异使用 `partial`
-- **集合初始化**：优先使用集合表达式 `[]`，如 `List<String> Tags { get; set; } = [];`
-- **Null 条件运算符**：优先使用 `?.`/`??` 简化空值检查；**C# 14 空条件赋值 `??=`**：变量为 null 时才赋值，可显著提升可读性
+- **集合初始化**：优先集合表达式 `[]`，如 `List<String> Tags { get; set; } = [];`
+- **Null 条件运算符**：优先 `?.`/`??`；**C# 14 空条件赋值 `??=`** 替代 `if (x == null) x = ...`
 
 ```csharp
-// ✅ C#14 空条件赋值（??=）：为 null 时才赋值，替代 if (x == null) x = ...
+// ✅ C#14 空条件赋值
 _cache ??= new MemoryCache();
 list ??= [];
 
-// ✅ if 内只有单行代码时可不加花括号（单行 if 同行或换行均可）
+// ✅ 单行 if 不加花括号（同行或换行均可）
 if (value == null) return;
 if (key == null) throw new ArgumentNullException(nameof(key));
 
-// ✅ 语句较长时另起一行，仍不加花括号
 if (value == null)
     throw new ArgumentNullException(nameof(value), "Value cannot be null");
 
-// ✅ 多分支单语句：不加花括号
+// ✅ 多分支单语句不加花括号
 if (count > 0)
     DoSomething();
 else
@@ -90,11 +107,6 @@ else
 foreach (var item in list)
 {
     Process(item);
-}
-
-for (var i = 0; i < count; i++)
-{
-    Process(i);
 }
 
 // ✅ using 优先无花括号声明；仅需生命周期（如锁）时用弃元
@@ -114,6 +126,7 @@ using var _ = _lock.AcquireLock();
 - 每个参数**必须有** `<param>` 标签，无论方法可见性
 - 有返回值**必须有** `<returns>`；复杂方法可增加 `<remarks>`
 - `public`/`protected` 成员必须注释；`[Obsolete]` 必须包含迁移建议
+- 主入口/常用类型应提供至少一个 `<example>` 代码块（AI 与开发者的首要参考）
 
 ### 4.6 异步与性能
 
@@ -125,26 +138,31 @@ using var _ = _lock.AcquireLock();
 
 - 精准异常类型：`ArgumentNullException`/`InvalidOperationException` 等
 - TryXxx 模式：不用异常作常规分支
-- 类型转换：优先使用 `Utility` 扩展方法，完整列表：`ToInt()`/`ToLong()`/`ToDouble()`/`ToDecimal()`/`ToBoolean()`/`ToDateTime()`/`ToDateTimeOffset()`
+- 类型转换：优先 `Utility` 扩展方法 — `ToInt()`/`ToLong()`/`ToDouble()`/`ToDecimal()`/`ToBoolean()`/`ToDateTime()`/`ToDateTimeOffset()`
 - 对外异常不暴露内部实现/路径
 
 ---
 
-## 5. NewLife 内置工具
+## 5. NewLife 内置工具（禁止重复造轮子）
 
-优先使用项目内置工具而非标准库，**禁止重复造轮子**：
+优先使用项目内置工具而非标准库：
 
 - 字符串构建：`Pool.StringBuilder`（替代 `new StringBuilder()`）
-- 时间戳（毫秒级相对时间）：`Runtime.TickCount64`；**代码计时（精确耗时测量）：`Stopwatch`**
-- 类型转换：`Utility` 扩展方法 — `ToInt()`/`ToLong()`/`ToDouble()`/`ToDecimal()`/`ToBoolean()`/`ToDateTime()`/`ToDateTimeOffset()`
-- 二进制读写：`SpanReader` / `SpanWriter`（替代手动字节偏移操作）
+- 时间戳（毫秒级相对时间）：`Runtime.TickCount64`；**精确耗时测量：`Stopwatch`**
+- 类型转换：`Utility` 扩展方法 — 见 4.7
+- 二进制读写：`SpanReader` / `SpanWriter`（替代手动字节偏移）
 - 追踪埋点：`Tracer?.NewSpan()`
+- HTTP 客户端：`ApiHttpClient`（多节点/负载均衡/失败重试）
+- 缓存：`MemoryCache.Instance` / Redis `FullRedis`（统一 `ICache` 接口）
+- 定时任务：`TimerX`（替代 `System.Threading.Timer`）
+
+> 详细 API 用法请直接查看对应类型的 XML 注释（IDE 跳转或 NuGet 包文档），无需另行加载技能。
 
 ---
 
 ## 6. 防御性注释（禁止删除）
 
-代码中带有说明文字的被注释代码属于**防御性注释**，记录历史踩坑经验。**禁止删除，禁止"恢复"执行**。可补充更详细说明。
+代码中带说明文字的被注释代码属于**防御性注释**，记录历史踩坑经验。**禁止删除，禁止"恢复"执行**。可补充更详细说明。
 
 ```csharp
 // 曾经尝试过同步等待，但会导致线程池饥饿和死锁
@@ -158,24 +176,23 @@ using var _ = _lock.AcquireLock();
 
 ## 7. 工作流
 
-触发检查（第 1 节触发信号表匹配，命中则读取专用指令） → 检索（**优先复用**现有实现） → 评估（公共 API/兼容性/性能） → 方案 → 实施 → 验证 → **AskQuestions 多选确认** → [需调整则循环] → 说明
+加载标注 → 触发检查（第 1 节） → 检索（**优先复用**现有实现 + XML 注释） → 评估（公共 API/兼容性/性能） → 方案 → 实施 → 验证 → 必要时 AskQuestions 确认 → 说明
 
-- **触发检查**：开始工作前必须完成，遗漏专用指令将导致输出不符合要求
+- **触发检查**：开始工作前必须完成
 - **实施**：完成主任务；顺带修复明显缺陷；顺带简化重复代码；保留原注释与结构
 - **验证**：代码变更必须编译通过；找到相关测试则运行；仅文档变更可跳过
-- **AskQuestions 多选确认**：使用 `vscode_askQuestions` 工具，多选询问用户是否满意；若需调整则修改后重新编译，循环至满意；确认满意后才进入下一项开发
 
 ### 主动优化原则
 
 用户要求**分析/优化代码**时：
 
 | 行动 | 说明 |
-|------|------|
-| **架构梳理** | 重构不清晰的结构，让代码更易懂 |
-| **缺陷修复** | 资源泄漏、空引用、并发问题、逻辑错误 → 直接修复 |
-| **代码简化** | 提取重复代码、合并冗余判断、应用现代语法 |
-| **性能优化** | 缓存重复计算、池化高频对象、避免无用分配 |
-| **注释完善** | 补充缺失的 XML 注释和关键逻辑说明 |
+|---|---|
+| 架构梳理 | 重构不清晰结构 |
+| 缺陷修复 | 资源泄漏/空引用/并发/逻辑错误直接修复 |
+| 代码简化 | 提取重复、合并冗余、应用现代语法 |
+| 性能优化 | 缓存重复计算、池化高频对象、避免无用分配 |
+| 注释完善 | 补 XML 注释和关键逻辑说明 |
 
 ---
 
@@ -193,12 +210,12 @@ using var _ = _lock.AcquireLock();
 
 **UTF-8 无 BOM**；存放 `Doc/` 目录；文件名优先中文，内容优先简体中文，避免乱码。**已有文件必须先读取再增量修改，禁止覆盖。**
 
-> 代码注释同样要求 UTF-8 无 BOM，优先简体中文。生成或编辑任何文件时须确保编码正确，防止中文乱码。
+> 代码注释同样要求 UTF-8 无 BOM，优先简体中文。
 
 ### NuGet 版本
 
 | 类型 | 格式 | 示例 |
-|------|------|------|
+|---|---|---|
 | 正式版 | `{主}.{子}.{年}.{月日}` | `11.9.2025.0701` |
 | 测试版 | `{主}.{子}.{年}.{月日}-beta{时分}` | `11.9.2025.0701-beta0906` |
 
@@ -206,11 +223,11 @@ using var _ = _lock.AcquireLock();
 
 ## 10. 重要禁止项
 
-以下是 AI 容易犯但在本项目影响严重的错误：
+AI 容易犯但在本项目影响严重的错误：
 
-- 将 `String`/`Int32` 改为 `string`/`int`（本项目反 C# 惯例，**必须用正式名**）
-- 删除防御性注释（带说明的注释代码）
-- 删除 for/foreach/while 循环体的花括号（**循环体必须有花括号，即使只有一行**）
+- 将 `String`/`Int32` 改为 `string`/`int`（必须用正式名）
+- 删除防御性注释
+- 删除 for/foreach/while 循环体的花括号
 - 将 `<summary>` 拆成多行
 - 擅自删除 `public`/`protected` 成员
 - 擅自新增外部 NuGet 依赖（需说明理由）
@@ -221,7 +238,7 @@ using var _ = _lock.AcquireLock();
 - 输出敏感凭据/内部地址
 - 发现问题却视而不见
 - 用户要求优化时仅做注释/测试等表面工作
-- **跳过第 1 节触发检查**（命中关键词却未加载专用指令文件，是最严重的遗漏错误）
+- **跳过加载标注或第 1 节触发检查**
 
 ---
 
@@ -244,58 +261,45 @@ using var _ = _lock.AcquireLock();
 
 ---
 
-## 12. Skills 技能文件
+## 12. Skills 与 Agents
 
-`.github/skills/<name>/SKILL.md` 格式，Copilot 可自动识别并提供给用户调用。选择技能后 AI 遵循其中的最佳实践指南。
+资产采用**最小化策略**：能由 NuGet 包 XML 注释承担的，不做 skill；能由全局 instructions 承担的，不做 instructions。仅保留**流程类、架构决策类、跨组件取舍**的资产。
 
-**快速使用指南（usage 类）**——按需快速上手，代码示例为主：
+### Skills（按需加载）
 
-| 技能目录 | 覆盖领域 |
-|---------|---------|
-| `caching` | ICache/MemoryCache/Redis 统一缓存接口 |
-| `logging-tracing` | ILog/XTrace 日志与 ITracer/DefaultTracer 链路追踪 |
-| `networking` | NetServer/NetSession TCP/UDP/WebSocket 网络编程 |
-| `serialization` | JSON/Binary/Span/CSV 序列化 |
-| `configuration` | Config&lt;T&gt;/IConfigProvider/HttpConfigProvider 配置管理 |
-| `http-client` | ApiHttpClient 多节点 HTTP 客户端与负载均衡 |
-| `dependency-injection` | ObjectContainer/Host/Plugin/Actor 依赖注入与宿主 |
-| `timer-scheduling` | TimerX/Cron 高级定时调度 |
-| `security` | Hash/AES/SM4/RSA/JWT/TokenProvider 安全与加密 |
-| `type-conversion` | ToInt/ToBoolean/StringHelper/Pool.StringBuilder 类型转换与工具 |
+仅在用户请求明显涉及对应主题时，主动 `read_file` 读取 `.github/skills/<name>/SKILL.md`：
 
-**深度设计指南（architecture 类）**——架构设计与代码审查场景：
-
-| 技能目录 | 覆盖领域 |
-|---------|---------|
-| `cache-provider-architecture` | ICache/ICacheProvider 设计与分布式锁 |
-| `logging-tracing-system` | ILog/ITracer 日志与链路追踪体系设计 |
+| 技能 | 适用场景 |
+|---|---|
+| `xcode-data-modeling` | 设计 Model.xml、xcode 命令生成实体 |
+| `xcode-sharding-etl` | XCode 分库分表、ETL 数据同步 |
+| `cube-mvc-backend` | Cube 后台管理系统、字段定制、视图覆盖 |
 | `network-server-sessions` | NetServer/NetSession 高性能服务器架构 |
-| `network-client` | NetClient/WebClientX 网络客户端 |
-| `serialization-patterns` | 序列化方案选型与扩展 |
-| `config-provider-system` | 配置提供者架构与远程配置中心 |
-| `http-client-loadbalancer` | ApiHttpClient 多节点负载均衡设计 |
-| `dependency-injection-ioc` | ObjectContainer IoC 容器详解 |
-| `timer-scheduler` | TimerX/Cron 调度原理与高级用法 |
-| `security-crypto-patterns` | 哈希/对称/非对称加密完整模式 |
-| `utility-extensions` | 类型转换/字符串/路径/反射扩展全集 |
+| `testing-strategy` | XCode + SQLite 轻量集成测试 |
+| `benchmark-testing` | BenchmarkDotNet 流程化性能测试 |
+| `project-architecture` | 两层/三层架构选型、充血模型 |
+| `development-workflow` | 需求拆分、迭代开发流程 |
+| `coding-standards` | 编码规范的元规则（写新规范时参考） |
+| `compatibility-checks` | 多目标框架兼容性审查 |
 
-其余技能目录（XCode/Cube/Redis/MQTT/Net/基础设施等）共 38 个，详见 `README.md`。
+> 完整目录请查看 `.github/skills/`。**未列入上表的目录均为已废弃**，不应主动加载。
+
+### Agents（用户主动 @ 调用）
+
+| Agent | 用途 |
+|---|---|
+| `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
+| `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
+| `code-review` | 按 NewLife 规范审查代码 |
 
 ---
 
-## 13. Agents 智能代理
+## 13. 资产维护原则
 
-`.github/agents/` 目录下定义了专用 AI 代理角色，用户可在 Copilot Chat 中通过 `@` 调用。
-
-| 代理文件 | 中文名 | 用途 |
-|---------|-------|------|
-| `newlife-expert.agent.md` | NewLife专家 | NewLife 组件专家：功能查询、组件推荐、编码指导 |
-| `code-review.agent.md` | 代码审查 | 代码审查：按 NewLife 规范 8 维度检查代码 |
-| `project-init.agent.md` | 项目初始化 | 项目初始化：按模板创建新 NewLife 项目结构 |
-| `release-prep.agent.md` | 发版准备 | 发版准备：ChangeLog/版本号/PackageReleaseNotes 全自动更新 |
-| `write-tech-docs.agent.md` | 文档写作 | 技术文档：读源码/现有文档，编写中文技术文档 |
-| `requirement-planning.agent.md` | 需求规划 | 需求规划：需求整理、功能拆分、技术方案、任务分解 |
-| `convention-mining.agent.md` | 规范提炼 | 规范提炼：分析代码库，提炼编码约定到 SKILL.md/instructions |
+- **30 天淘汰制**：连续 30 天未触发的 skill/instructions 进入删除候选
+- **搬运型禁止**：内容能由 XML 注释或通用知识覆盖的 skill 不应存在
+- **单一事实源**：API 用法首选 XML 注释；架构决策首选 skill；硬约束首选本文件
+- **改动验证**：修改本文件或 instructions 后，在真实项目随机提一个相关问题，观察加载标注是否符合预期
 
 ---
 
