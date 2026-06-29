@@ -294,6 +294,9 @@ AI 容易犯但在本项目影响严重的错误：
 | `cube-mvc-backend` | Cube 后台管理深度定制：字段操作速查、视图覆盖、ConfigController（触发 cube.instructions.md 后进一步参考） |
 | `project-architecture` | 两层/三层架构选型、充血模型、Service 是否抽取的判断 |
 | `benchmark-testing` | BenchmarkDotNet 流程化性能测试、基准报告编写 |
+| `competitive-analysis` | 联网搜索 GitHub 竞品、制作功能对比矩阵、输出竞品分析报告 |
+| `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）/E2E 测试策略与规范 |
+| `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码的多模式对比验证 |
 
 > **未列入上表的目录均为已废弃**，不应主动加载。
 
@@ -304,6 +307,7 @@ AI 容易犯但在本项目影响严重的错误：
 | `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
 | `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
 | `code-review` | 按 NewLife 规范审查代码 |
+| `dev-loop` | 自治开发循环：选功能→实现→测试→提交→更新清单→检查点报告 |
 
 ---
 
