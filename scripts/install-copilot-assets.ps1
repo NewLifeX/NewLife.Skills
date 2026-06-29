@@ -3,8 +3,8 @@
     安装 / 更新 / 卸载 NewLife Copilot 资产到 VS Code 用户数据目录。
 
 .DESCRIPTION
-    将 .github/ 下的 skills/instructions/prompts/agents 同步到 VS Code 用户数据目录：
-      Skills        → %APPDATA%\Code\User\prompts\skills\<name>\
+    将 .github/ 下的 skills/instructions/prompts/agents 同步到 VS Code Copilot 用户目录：
+      Skills        → %USERPROFILE%\.copilot\skills\<name>\   （Copilot 官方用户技能路径）
       Instructions  → %APPDATA%\Code\User\prompts\*.instructions.md
       Prompts       → %APPDATA%\Code\User\prompts\*.prompt.md
       Agents        → %APPDATA%\Code\User\prompts\*.agent.md
@@ -65,7 +65,10 @@ Set-StrictMode -Version Latest
 $githubDir       = Join-Path $RepoRoot ".github"
 $userDataDir     = Join-Path $env:APPDATA "Code\User"
 $promptsDst      = Join-Path $userDataDir "prompts"
-$skillsDst       = Join-Path $promptsDst "skills"
+# Copilot 官方用户技能路径：~/.copilot/skills/（非 prompts/skills/）
+$skillsDst       = Join-Path "$env:USERPROFILE\.copilot" "skills"
+# 旧版本错装在 prompts/skills/ 下，升级后自动清理
+$skillsDstOld    = Join-Path $promptsDst "skills"
 $manifestPath    = Join-Path $promptsDst "newlife-skills-manifest.json"
 
 $skillsSrc       = Join-Path $githubDir "skills"
@@ -112,10 +115,23 @@ function WriteManifest ([String[]]$Assets) {
     [System.IO.File]::WriteAllText($manifestPath, $json, [System.Text.UTF8Encoding]::new($false))
 }
 
-# 资产相对路径（相对于 prompts/ 根）。约定：
-#   - skill 文件夹：  "skills/<name>"
-#   - 文件资产：       "<filename>.ext"
+# 资产相对路径约定：
+#   - skill 文件夹：  "skills/<name>"  → 新在 %USERPROFILE%\.copilot\skills\，旧在 prompts\skills\
+#   - 文件资产：       "<filename>.ext" → %APPDATA%\Code\User\prompts\
 function RemoveAsset ([String]$RelPath) {
+    if ($RelPath.StartsWith("skills/", [StringComparison]::OrdinalIgnoreCase)) {
+        # 技能类资产：同时尝试新旧两个位置
+        $removed = $false
+        $fullNew = Join-Path $skillsDst ($RelPath.Substring(7))
+        $fullOld = Join-Path $skillsDstOld ($RelPath.Substring(7))
+        foreach ($full in @($fullNew, $fullOld)) {
+            if (Test-Path $full) {
+                if (-not $WhatIf) { Remove-Item -Path $full -Recurse -Force }
+                $removed = $true
+            }
+        }
+        return $removed
+    }
     $full = Join-Path $promptsDst $RelPath
     if (-not (Test-Path $full)) { return $false }
     if ($WhatIf) { return $true }
@@ -142,7 +158,8 @@ function CopySkillFolder ([System.IO.DirectoryInfo]$SrcDir) {
 Write-Host ""
 Write-Host "=== NewLife Copilot 资产安装 ===" -ForegroundColor Green
 Write-Host "  仓库: $RepoRoot"
-Write-Host "  目标: $promptsDst"
+Write-Host "  目标 (技能): $skillsDst"
+Write-Host "  目标 (指令等): $promptsDst"
 if ($WhatIf)    { Write-Host "  模式: 预览（WhatIf）" -ForegroundColor Yellow }
 if ($Uninstall) { Write-Host "  模式: 卸载（Uninstall）" -ForegroundColor Yellow }
 Write-Host ""
@@ -154,6 +171,8 @@ if (-not $Uninstall -and -not (Test-Path $githubDir)) {
 
 EnsureDir $promptsDst
 EnsureDir $skillsDst
+# 旧路径（升级清理用），不主动创建
+if (Test-Path $skillsDstOld) { Write-Host "  ⚠ 检测到旧版技能路径，安装后将自动清理" -ForegroundColor Yellow }
 
 # ── Uninstall ─────────────────────────────────────────────────────────────────
 if ($Uninstall) {
@@ -220,8 +239,13 @@ $oldAssets = @(ReadManifest)
 if ($AssumeAllOrphans) {
     Write-Host "[迁移扫描] 将磁盘上所有本工具命名规则的资产视为旧安装" -ForegroundColor Yellow
     $virtual = New-Object System.Collections.Generic.List[String]
+    # 新技能路径
     if (Test-Path $skillsDst) {
         Get-ChildItem -Path $skillsDst -Directory | ForEach-Object { $virtual.Add("skills/$($_.Name)") }
+    }
+    # 旧技能路径（兼容清理）
+    if (Test-Path $skillsDstOld) {
+        Get-ChildItem -Path $skillsDstOld -Directory | ForEach-Object { $virtual.Add("skills/$($_.Name)") }
     }
     Get-ChildItem -Path $promptsDst -Filter "*.instructions.md" -File | ForEach-Object { $virtual.Add($_.Name) }
     Get-ChildItem -Path $promptsDst -Filter "*.agent.md" -File | ForEach-Object { $virtual.Add($_.Name) }
@@ -258,6 +282,26 @@ foreach ($folder in $skillFolders) {
     $installed++
 }
 if ($skillFolders.Count -eq 0) { Write-Host "    （空）" -ForegroundColor DarkGray }
+
+# 清理旧版技能路径（%APPDATA%\Code\User\prompts\skills\ 下同名目录）
+if (Test-Path $skillsDstOld) {
+    $cleanedOld = 0
+    foreach ($folder in $skillFolders) {
+        $oldPath = Join-Path $skillsDstOld $folder.Name
+        if (Test-Path $oldPath) {
+            if (-not $WhatIf) { Remove-Item -Path $oldPath -Recurse -Force }
+            $cleanedOld++
+        }
+    }
+    if ($cleanedOld -gt 0) {
+        Write-Host "    （旧路径清理 $cleanedOld 项）" -ForegroundColor DarkGray
+    }
+    # 旧目录为空则删除
+    $remaining = @(Get-ChildItem -Path $skillsDstOld -ErrorAction SilentlyContinue)
+    if ($remaining.Count -eq 0 -and -not $WhatIf) {
+        Remove-Item -Path $skillsDstOld -Force -ErrorAction SilentlyContinue
+    }
+}
 
 # 2. Instructions
 Write-Host "[2/5] Instructions ($($instructionFiles.Count))" -ForegroundColor Yellow
