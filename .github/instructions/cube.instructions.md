@@ -1,3 +1,7 @@
+---
+description: '使用 NewLife.Cube（魔方）Web 框架开发后台管理系统。涵盖 EntityController 实体控制器、Area 区域注册、菜单与权限（PermissionFlags）、列表与表单字段配置、Search 高级搜索重写、CRUD 钩子。适用于 Cube、魔方、后台管理、控制器、Area 区域相关任务。'
+---
+
 # Cube 协作指令
 
 本指令面向新生命团队（NewLife）开源 Web 快速开发框架 Cube（魔方），帮助 Copilot 在 .NET 项目中正确使用 Cube 进行 Web 管理后台开发。
@@ -155,16 +159,7 @@ static OrderController()
 
 ### 4.2 ListField 扩展属性
 
-| 属性 | 说明 |
-|------|------|
-| `Header` | 列头文字（覆盖 DisplayName） |
-| `Url` | 单元格链接，`{属性名}` 自动插值 |
-| `Target` | 链接目标（`_blank` 等） |
-| `DataAction` | `"action"` = ajax 调用，`null` = 普通跳转 |
-| `GetValue` | 自定义单元格值（委托） |
-| `GetClass` | 动态 CSS 类（委托） |
-| `DataVisible` | 动态控制是否显示（委托） |
-| `TextAlign` | 对齐方式 |
+列表列支持 `Header` / `Url` / `Target` / `DataAction` / `GetValue` / `GetClass` / `DataVisible` / `TextAlign` 等扩展属性，用于自定义链接、单元格值、动态样式与可见性。**完整属性速查与示例见 `cube-mvc-backend` skill。**
 
 ---
 
@@ -217,14 +212,7 @@ Areas/
 
 ### 7.1 PermissionFlags
 
-| 值 | 含义 |
-|----|------|
-| `Detail` (0x01) | 查看 |
-| `Insert` (0x02) | 新增 |
-| `Update` (0x04) | 编辑 |
-| `Delete` (0x08) | 删除 |
-| `Approve` (0x10) | 审批 |
-| `Export` (0x20) | 导出 |
+6 种权限位：`Detail`(0x01) 查看、`Insert`(0x02) 新增、`Update`(0x04) 编辑、`Delete`(0x08) 删除、`Approve`(0x10) 审批、`Export`(0x20) 导出。`EntityController<T>` 内置 5 个标准 Action 已自动绑定权限。**权限体系与数据权限（多租户隔离）深度用法见 `cube-mvc-backend` skill。**
 
 ### 7.2 权限标注
 
@@ -242,25 +230,7 @@ public ActionResult Public() { ... }
 
 ## 8. CRUD 钩子
 
-```csharp
-protected override Boolean Valid(Order entity, DataObjectMethodType type, Boolean post)
-{
-    if (post && entity.Amount <= 0) throw new Exception("金额必须大于0");
-    return base.Valid(entity, type, post);
-}
-
-protected override void OnInsert(Order entity)
-{
-    entity.CreateUserId = ManageProvider.User?.ID ?? 0;
-    base.OnInsert(entity);
-}
-
-protected override void OnDelete(Order entity)
-{
-    if (entity.Status == 2) throw new Exception("已完成订单不允许删除");
-    base.OnDelete(entity);
-}
-```
+控制器可重写 `Valid`（保存前验证）、`OnInsert` / `OnUpdate` / `OnDelete`（增删改前处理）等钩子注入业务逻辑。**完整钩子签名与示例见 `cube-mvc-backend` skill。**
 
 ---
 

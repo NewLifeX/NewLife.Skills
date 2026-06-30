@@ -70,8 +70,9 @@ cd NewLife.Skills
 
 | 文件 | 触发场景 |
 |---|---|
-| `xcode.instructions.md` | XCode / Model.xml / 数据库 ORM |
-| `development.instructions.md` | 新建系统 / 需求分析 / 架构设计 / 多迭代开发 |
+| `xcode.instructions.md` | XCode / Model.xml / 实体生成 / 数据库 ORM |
+| `cube.instructions.md` | Cube / 魔方 / 后台管理 / EntityController / Area 区域 |
+| `development.instructions.md` | 新建系统 / 需求分析 / 架构设计 / 迭代开发 / 自治模式 |
 
 ### Skills（按需加载）
 
@@ -80,15 +81,12 @@ cd NewLife.Skills
 | 技能 | 适用场景 |
 |---|---|
 | `xcode-data-modeling` | 设计 Model.xml、xcode 命令生成实体 |
-| `xcode-sharding-etl` | XCode 分库分表、ETL 数据同步 |
-| `cube-mvc-backend` | Cube 后台管理系统、字段定制、视图覆盖 |
-| `network-server-sessions` | NetServer/NetSession 高性能服务器架构 |
-| `testing-strategy` | XCode + SQLite 轻量集成测试 |
-| `benchmark-testing` | BenchmarkDotNet 流程化性能测试 |
-| `project-architecture` | 两层/三层架构选型、充血模型 |
-| `development-workflow` | 需求拆分、迭代开发流程 |
-| `coding-standards` | 编码规范的元规则（写新规范时参考） |
-| `compatibility-checks` | 多目标框架兼容性审查 |
+| `cube-mvc-backend` | Cube 后台管理深度定制：字段速查、视图覆盖、ConfigController |
+| `project-architecture` | 两层/三层架构选型、充血模型、Service 抽取判断 |
+| `benchmark-testing` | BenchmarkDotNet 流程化性能测试、基准报告 |
+| `competitive-analysis` | 联网搜索 GitHub 竞品、功能对比矩阵、竞品分析报告 |
+| `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）/E2E 测试策略 |
+| `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证 |
 
 ### Agents（用户主动 `@` 调用）
 
@@ -99,6 +97,7 @@ cd NewLife.Skills
 | `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
 | `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
 | `code-review` | 按 NewLife 规范审查代码 |
+| `dev-loop` | 自治开发循环：选功能→实现→测试→更新清单→提交→检查点报告 |
 
 ### Prompts
 
@@ -119,7 +118,7 @@ cd NewLife.Skills
   skills/                   # 技能（按需加载）
   agents/                   # 智能体（@ 调用）
   prompts/                  # 提示词模板
-docs/                       # 设计文档、技能体系说明
+docs/                       # 维护原则与治理文档
 scripts/
   install-copilot-assets.ps1
 ```
@@ -132,7 +131,7 @@ scripts/
 
 | 资产 | 目标 |
 |---|---|
-| Skills (`<name>/SKILL.md`) | `%APPDATA%\Code\User\prompts\skills\` |
+| Skills (`<name>/SKILL.md`) | `%USERPROFILE%\.copilot\skills\` |
 | Instructions / Prompts / Agents | `%APPDATA%\Code\User\prompts\` |
 | 全局指令 | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
 
@@ -145,4 +144,4 @@ scripts/
 3. **单一事实源**：API 用法首选 XML 注释；架构决策首选 skill；硬约束首选全局 instructions
 4. **改动验证**：修改后在真实项目随机提一个相关问题，观察「已加载」标注是否符合预期
 
-详见 [docs/skill-system-design.md](docs/skill-system-design.md)。
+详见 [docs/三层架构与维护原则.md](docs/三层架构与维护原则.md)。

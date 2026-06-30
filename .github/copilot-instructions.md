@@ -280,41 +280,10 @@ AI 容易犯但在本项目影响严重的错误：
 
 ---
 
-## 12. Skills 与 Agents
+## 12. 资产清单与维护
 
-资产采用**最小化策略**：能由 NuGet 包 XML 注释承担的，不做 skill；能由全局 instructions 承担的，不做 instructions。仅保留**流程类、架构决策类、跨组件取舍**的资产。
+完整的 skills / agents / instructions / prompts 清单见仓库 README.md；资产维护原则（三层架构、搬运型禁止、30 天淘汰制、资产维护流程）见 docs/三层架构与维护原则.md。本文件只保留两条直接驱动 AI 行为的原则：
 
-### Skills（按需加载）
-
-仅在用户请求明显涉及对应主题时，主动 `read_file` 读取 `.github/skills/<name>/SKILL.md`：
-
-| 技能 | 适用场景 |
-|---|---|
-| `xcode-data-modeling` | 设计 Model.xml、xcode 命令生成实体（触发 xcode.instructions.md 后进一步参考） |
-| `cube-mvc-backend` | Cube 后台管理深度定制：字段操作速查、视图覆盖、ConfigController（触发 cube.instructions.md 后进一步参考） |
-| `project-architecture` | 两层/三层架构选型、充血模型、Service 是否抽取的判断 |
-| `benchmark-testing` | BenchmarkDotNet 流程化性能测试、基准报告编写 |
-| `competitive-analysis` | 联网搜索 GitHub 竞品、制作功能对比矩阵、输出竞品分析报告 |
-| `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）/E2E 测试策略与规范 |
-| `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码的多模式对比验证 |
-
-> **未列入上表的目录均为已废弃**，不应主动加载。
-
-### Agents（用户主动 @ 调用）
-
-| Agent | 用途 |
-|---|---|
-| `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
-| `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
-| `code-review` | 按 NewLife 规范审查代码 |
-| `dev-loop` | 自治开发循环：选功能→实现→测试→提交→更新清单→检查点报告 |
-
----
-
-## 13. 资产维护原则
-
-- **30 天淘汰制**：连续 30 天未触发的 skill/instructions 进入删除候选
-- **搬运型禁止**：内容能由 XML 注释或通用知识覆盖的 skill 不应存在
 - **单一事实源**：API 用法首选 XML 注释；架构决策首选 skill；硬约束首选本文件
 - **改动验证**：修改本文件或 instructions 后，在真实项目随机提一个相关问题，观察加载标注是否符合预期
 

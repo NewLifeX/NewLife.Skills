@@ -1,3 +1,8 @@
+---
+description: '为 C# 代码生成高质量 Markdown API 文档，包含 frontmatter、概述、快速开始、API 表格、最佳实践。适用于为 NewLife 类型编写技术文档。'
+agent: 'agent'
+---
+
 # 角色
 你是新生命团队（NewLife）的资深技术文档工程师。
 

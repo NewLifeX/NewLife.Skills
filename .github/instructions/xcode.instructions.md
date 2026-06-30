@@ -1,3 +1,7 @@
+---
+description: '使用 NewLife.XCode 数据中间件进行数据建模与实体操作。涵盖 Model.xml 表结构设计、xcode 命令生成实体、数据库 CRUD、实体 Biz 查询封装、运行时拦截器与反向工程。适用于 XCode、实体生成、ORM、Model.xml、数据库相关任务。'
+---
+
 # XCode 协作指令
 
 本指令面向新生命团队（NewLife）开源数据中间件 XCode，帮助 Copilot 在 .NET 项目中正确使用 XCode 进行数据建模和实体操作。
@@ -98,7 +102,9 @@ dotnet new install NewLife.Templates
 
 ---
 
-## 4. Model.xml 完整参考
+## 4. Model.xml 数据建模
+
+> **完整属性参考（Option / Table / Column / Index 全部属性、主键设计约定、Map 外键、ShowIn / ItemType / DataScale 语法、完整示例）见 `xcode-data-modeling` skill。** 本节仅保留文件骨架与高频约定，详细建模时请加载该 skill。
 
 ### 4.1 文件结构
 
@@ -123,136 +129,21 @@ dotnet new install NewLife.Templates
 </EntityModel>
 ```
 
-### 4.2 Option 配置项
+### 4.2 关键建模约定（速记）
 
-| 配置项 | 说明 | 示例 |
-|--------|------|------|
-| `Namespace` | 命名空间 | `Zero.Data` |
-| `ConnName` | 数据库连接名 | `Zero` |
-| `Output` | 实体类输出目录 | `.\` |
-| `BaseClass` | 实体基类 | `Entity` |
-| `ChineseFileName` | 使用中文文件名 | `True` |
-| `Nullable` | 生成可空引用类型 | `True` |
-| `HasIModel` | 实现 IModel 接口 | `True` |
-| `ModelClass` | 模型类模板 | `{name}Model` |
-| `ModelsOutput` | 模型类输出目录 | `.\Models\` |
-| `ModelInterface` | 模型接口模板 | `I{name}` |
-| `InterfacesOutput` | 接口输出目录 | `.\Interfaces\` |
-| `ClassNameTemplate` | 类名模板 | `{name}Model`/`I{name}Dto` |
-| `DisplayNameTemplate` | 显示名模板 | `{displayName}` |
-| `ModelNameForCopy` | Copy 函数参数类型 | `{name}`/`I{name}` |
-| `ModelNameForToModel` | ToModel 转换目标类型 | `{name}`/`{name}DTO` |
-| `ExtendNameSpace` | 额外引用命名空间（逗号分隔） | `System.Xml.Serialization` |
-| `NameFormat` | 命名格式 | `Default`/`Upper`/`Lower`/`Underline` |
-| `DisplayName` | 魔方区域显示名 | `订单管理` |
-| `CubeOutput` | 魔方控制器输出目录 | `../../Web/Areas/Order` |
+写 Model.xml 时高频用到的约定，完整属性表见 `xcode-data-modeling` skill：
 
-### 4.3 Table 属性
+- **主键**：普通表 `Int32` 自增（`PrimaryKey="True" Identity="True"`）；大数据表 `Int64` 雪花 ID（`PrimaryKey="True" DataScale="time"`，不设 Identity）
+- **字符串**：必须指定 `Length`，大文本用 `-1`
+- **主字段**：业务主显示字段设 `Master="True"`（每表最多一个）
+- **外键关联**：`Map="表名@主键@显示字段"`（如 `User@Id@Name`）
+- **扩展字段**：`CreateTime` / `UpdateTime` / `CreateUser` / `CreateIP` 等由拦截器自动填充（见 §6.1），设 `Model="False" Category="扩展"`
+- **索引**：查询条件字段加 `<Index>`，唯一约束加 `Unique="True"`
+- **显示控制**：`ShowIn` 控制字段在 List/Detail/Form/Search 各区域显示；`ItemType` 指定前端组件（image/file/url 等）
 
-| 属性 | 说明 | 示例 |
-|------|------|------|
-| `Name` | 实体类名 | `User` |
-| `TableName` | 数据库表名（可选，默认同 Name） | `sys_user` |
-| `Description` | 表说明 | `用户。用户账号信息` |
-| `ConnName` | 独立连接名（覆盖全局） | `Log` |
-| `BaseType` | 基类（支持实体继承） | `EntityBase` |
-| `InsertOnly` | 仅插入模式（日志表优化） | `True` |
-| `IsView` | 视图标识 | `True` |
+> 完整 Option / Table / Column / Index 属性表、ShowIn 三种语法、DataScale 分表详解 → 加载 `xcode-data-modeling` skill；下方 §4.3 提供完整 Model.xml 范例。
 
-### 4.4 Column 属性完整参考
-
-#### 基础属性
-
-| 属性 | 说明 | 示例 |
-|------|------|------|
-| `Name` | 属性名 | `UserName` |
-| `ColumnName` | 数据库列名（可选） | `user_name` |
-| `DataType` | 数据类型 | `Int32`/`Int64`/`String`/`DateTime`/`Boolean`/`Double`/`Decimal` |
-| `Description` | 字段说明 | `用户名。登录账号` |
-| `Length` | 字符串长度 | `50`/`200`/`-1`（大文本） |
-| `Precision` | 数值精度 | `18` |
-| `Scale` | 小数位数 | `2` |
-
-#### 主键与标识
-
-| 属性 | 说明 | 示例 |
-|------|------|------|
-| `PrimaryKey` | 主键 | `True` |
-| `Identity` | 自增标识 | `True` |
-| `Master` | 主字段（业务主要字段） | `True` |
-
-**主键设计约定**：
-- 普通表：`Int32` 自增 → `PrimaryKey="True" Identity="True"`
-- 大数据表：`Int64` 雪花 ID → `PrimaryKey="True" DataScale="time"`（不设 Identity）
-
-#### 约束与默认值
-
-| 属性 | 说明 | 示例 |
-|------|------|------|
-| `Nullable` | 允许空 | `False` |
-| `DefaultValue` | 默认值 | `0`/`''`/`getdate()` |
-
-#### 映射关系（Map）
-
-格式：`表名@主键@显示字段@属性名`
-
-| 格式 | 说明 | 示例 |
-|------|------|------|
-| `Table@Id@Name` | 基本映射（三段） | `Role@Id@Name` |
-| `Table@Id@Name@RoleName` | 指定属性名（四段） | `Role@Id@Name@RoleName` |
-| `NS.Table@Id@Path@AreaPath` | 完整命名空间 | `XCode.Membership.Area@Id@Path@AreaPath` |
-
-#### 元素类型（ItemType）
-
-用于魔方前端渲染，常用值：`image`、`file`、`mail`、`mobile`、`url`、`TimeSpan`、`GMK`、`html`、`code`、`json`。详细用法见 `cube.instructions.md`。
-
-#### 显示选项（ShowIn）
-
-控制字段在魔方各区域（List/Detail/AddForm/EditForm/Search）的显示。推荐具名列表语法：
-
-```
-ShowIn="List,Search"          # 仅 List 和 Search 显示
-ShowIn="-EditForm,-Detail"    # 编辑表单和详情隐藏
-ShowIn="All,-Detail"          # 全部显示，详情隐藏
-```
-
-区域别名：`List(L)`、`Detail(D)`、`AddForm(Add/A)`、`EditForm(Edit/E)`、`Search(S)`、`Form(F)`（同时控制 Add 和 Edit）
-
-**语法二：管道分隔**
-```
-ShowIn="Y|Y|N||A"   # List=显示|Detail=显示|Add=隐藏|Edit=自动|Search=自动
-```
-
-**语法三：5字符掩码**
-```
-ShowIn="11110"      # 1=显示, 0=隐藏, A/?/-=自动
-```
-
-#### 分表字段（DataScale）
-
-| 值 | 说明 |
-|----|------|
-| `time` | 大数据单表的时间字段（用于雪花 ID） |
-| `timeShard:yyMMdd` | 分表字段，按日期格式分表 |
-
-#### 其他属性
-
-| 属性 | 说明 | 示例 |
-|------|------|------|
-| `Type` | 枚举类型 | `XCode.Membership.SexKinds` |
-| `Category` | 表单分组 | `登录信息`/`扩展` |
-| `Attribute` | 额外特性 | `XmlIgnore, IgnoreDataMember` |
-| `Model` | 是否包含在模型类中 | `False` |
-| `RawType` | 原始数据库类型 | `varchar(50)` |
-
-### 4.5 Index 属性
-
-| 属性 | 说明 | 示例 |
-|------|------|------|
-| `Columns` | 索引列（逗号分隔） | `Name`/`Category,CreateTime` |
-| `Unique` | 唯一索引 | `True` |
-
-### 4.6 完整示例
+### 4.3 完整示例
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
