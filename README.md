@@ -60,6 +60,8 @@ cd NewLife.Skills
 
 ## 资产清单
 
+> **项目文档规范**：NewLife 项目的 `Doc/` 目录标准产物见 [development.instructions.md](.github/instructions/development.instructions.md) —— 需求文档、功能清单、架构设计、竞品分析，通过 README 导航即可，无需独立索引文件。
+
 ### 全局指令
 
 [.github/copilot-instructions.md](.github/copilot-instructions.md)——所有 NewLife 项目通用的硬约束：加载标注、兼容性、命名/类型/风格规范、防御性注释、内置工具优先、工作流。
