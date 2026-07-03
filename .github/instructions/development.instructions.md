@@ -206,6 +206,8 @@ sequenceDiagram
 
 ### 2.4 竞品分析文档
 
+> **定位**：竞品分析是需求的**第二来源**。先用内部视角（§2.1）拆出初版模块和功能列表（§2.2），形成项目骨架；再用竞品分析补充差距功能，避免"闭门造车"。
+
 `Doc/竞品分析.md` 记录竞品功能对比与差距，是需求的第二来源。详细执行流程由 [competitive-analysis](../../.github/skills/competitive-analysis/SKILL.md) 技能驱动。
 
 ```markdown

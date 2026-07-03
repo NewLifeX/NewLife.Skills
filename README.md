@@ -147,3 +147,20 @@ scripts/
 4. **改动验证**：修改后在真实项目随机提一个相关问题，观察「已加载」标注是否符合预期
 
 详见 [docs/三层架构与维护原则.md](docs/三层架构与维护原则.md)。
+
+---
+
+## 项目使用建议
+
+将本仓库资产安装到 VS Code 后，建议在你的项目 `README.md` 中声明以下信息，帮助 AI 更准确地工作（开发循环 agent 会优先读取）：
+
+```markdown
+## AI 协作声明
+
+- **项目类型**：.NET 后端 / Node.js 前端 / 全栈
+- **编译命令**：`dotnet build` / `pnpm build`
+- **测试命令**：`dotnet test` / `pnpm test`
+- **核心项目**：`src/MyApp.Service`（后端）、`src/MyApp.Web`（前端）
+```
+
+> 声明后，开发循环 agent 的编译/测试命令检测步骤会优先以 README 声明为准，无需每次手动指定。
