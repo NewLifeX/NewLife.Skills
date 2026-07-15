@@ -141,47 +141,7 @@ dotnet new install NewLife.Templates
 - **索引**：查询条件字段加 `<Index>`，唯一约束加 `Unique="True"`
 - **显示控制**：`ShowIn` 控制字段在 List/Detail/Form/Search 各区域显示；`ItemType` 指定前端组件（image/file/url 等）
 
-> 完整 Option / Table / Column / Index 属性表、ShowIn 三种语法、DataScale 分表详解 → 加载 `xcode-data-modeling` skill；下方 §4.3 提供完整 Model.xml 范例。
-
-### 4.3 完整示例
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<EntityModel xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" 
-             xs:schemaLocation="https://newlifex.com https://newlifex.com/Model202509.xsd" 
-             xmlns="https://newlifex.com/Model202509.xsd">
-  <Option>
-    <Namespace>Order.Data</Namespace>
-    <ConnName>Order</ConnName>
-    <Output>.\</Output>
-    <ChineseFileName>True</ChineseFileName>
-    <Nullable>True</Nullable>
-    <HasIModel>True</HasIModel>
-    <DisplayName>订单管理</DisplayName>
-    <CubeOutput>../../OrderWeb/Areas/Order</CubeOutput>
-  </Option>
-  <Tables>
-    <Table Name="Order" Description="订单。电商订单主表">
-      <Columns>
-        <Column Name="Id" DataType="Int64" PrimaryKey="True" DataScale="time" Description="编号" />
-        <Column Name="OrderNo" DataType="String" Master="True" Length="50" Nullable="False" Description="订单号" />
-        <Column Name="UserId" DataType="Int32" Map="User@Id@Name" Description="用户" />
-        <Column Name="Status" DataType="Int32" Type="Order.Data.OrderStatus" Description="状态" />
-        <Column Name="TotalAmount" DataType="Decimal" Precision="18" Scale="2" Description="总金额" />
-        <Column Name="Remark" DataType="String" Length="500" Description="备注" Category="扩展" />
-        <Column Name="CreateUser" DataType="String" Description="创建者" Model="False" Category="扩展" />
-        <Column Name="CreateTime" DataType="DateTime" Nullable="False" Description="创建时间" Category="扩展" />
-        <Column Name="UpdateTime" DataType="DateTime" Description="更新时间" Model="False" Category="扩展" />
-      </Columns>
-      <Indexes>
-        <Index Columns="OrderNo" Unique="True" />
-        <Index Columns="UserId" />
-        <Index Columns="Status,CreateTime" />
-      </Indexes>
-    </Table>
-  </Tables>
-</EntityModel>
-```
+> 完整 Option / Table / Column / Index 属性表、ShowIn 三种语法、DataScale 分表详解 → 加载 `xcode-data-modeling` skill。
 
 ---
 

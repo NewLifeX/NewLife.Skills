@@ -234,28 +234,7 @@ wwwroot/css/custom.css                       # 覆盖或新增静态资源
 
 ## 权限体系
 
-### PermissionFlags 枚举
-
-| 值 | 含义 | 适用 Action |
-|----|------|------------|
-| `Detail` (0x01) | 查看 | Index、Detail |
-| `Insert` (0x02) | 新增 | Add (GET/POST) |
-| `Update` (0x04) | 编辑 | Edit (GET/POST) |
-| `Delete` (0x08) | 删除 | Delete |
-| `Approve` (0x10) | 审批 | 自定义 Action |
-| `Export` (0x20) | 导出 | Export |
-
-`EntityController<T>` 内置 5 个标准 Action 已自动绑定权限，无需手动标注。
-
-### EntityAuthorize 用法
-
-```csharp
-[EntityAuthorize(PermissionFlags.Approve)]
-public ActionResult Approve(Int32 id) { ... }
-
-[AllowAnonymous]
-public ActionResult Public() { ... }
-```
+> 权限位枚举（PermissionFlags）定义与基础权限标注参见 `cube.instructions.md` §7。本 skill 仅补充数据权限（多租户隔离）深度用法。
 
 ### 数据权限（多租户隔离）
 

@@ -11,6 +11,8 @@ argument-hint: >
 
 # XCode 数据建模
 
+> 基础用法（环境准备、实体 CRUD、Biz 约定）参见 `xcode.instructions.md`，本 skill 专注 Model.xml 深度属性参考与数据建模细节。
+
 ## 适用场景
 
 - 新建 XCode 数据类库，从零开始创建 `Model.xml` 进行数据建模。
@@ -18,52 +20,6 @@ argument-hint: >
 - 设计合理的主键策略（普通表 vs 大数据表）。
 - 配置字段外键关联（Map）、界面显示控制（ShowIn）、分表标记（DataScale）。
 - 执行 `xcode` 命令生成实体类、模型接口、数据字典、魔方控制器。
-
-## 环境准备
-
-```powershell
-# 安装 XCode NuGet 包
-dotnet add package NewLife.XCode
-
-# 安装 xcodetool 代码生成工具
-dotnet tool install xcodetool -g
-
-# 安装项目模板（发布日期须 > 2025-08-01）
-dotnet new details NewLife.Templates
-dotnet new install NewLife.Templates   # 未安装或版本过旧时执行
-
-# 创建数据类库项目
-dotnet new xcode -n Zero.Data
-
-# 创建 Web 管理后台（可选）
-dotnet new cube -n ZeroWeb
-
-# 创建控制台应用（可选）
-dotnet new nconsole -n ZeroApp
-```
-
-## Model.xml 文件结构
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<EntityModel xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
-             xs:schemaLocation="https://newlifex.com https://newlifex.com/Model202509.xsd"
-             xmlns="https://newlifex.com/Model202509.xsd">
-  <Option>
-    <!-- 全局配置 -->
-  </Option>
-  <Tables>
-    <Table>
-      <Columns>
-        <Column />
-      </Columns>
-      <Indexes>
-        <Index />
-      </Indexes>
-    </Table>
-  </Tables>
-</EntityModel>
-```
 
 ## Option 配置项
 
