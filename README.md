@@ -60,7 +60,7 @@ cd NewLife.Skills
 
 ## 资产清单
 
-> **项目文档规范**：NewLife 项目的 `Doc/` 目录标准产物见 [development.instructions.md](.github/instructions/development.instructions.md) —— 需求文档、功能清单、架构设计、竞品分析，通过 README 导航即可，无需独立索引文件。
+> **项目文档规范**：NewLife 项目的 `Doc/` 目录标准产物（需求文档、功能清单、架构设计、竞品分析）见 [`development-process`](.github/skills/development-process/SKILL.md) 技能。基础约定（文档命名、反模式）见 [`development.instructions.md`](.github/instructions/development.instructions.md)。通过 README 导航即可，无需独立索引文件。
 
 ### 全局指令
 
@@ -87,6 +87,7 @@ cd NewLife.Skills
 | `project-architecture` | 两层/三层架构选型、充血模型、Service 抽取判断 |
 | `benchmark-testing` | BenchmarkDotNet 流程化性能测试、基准报告 |
 | `competitive-analysis` | 联网搜索 GitHub 竞品、功能对比矩阵、竞品分析报告 |
+| `development-process` | 新建系统研发全流程：需求文档、功能清单、架构设计、迭代开发、自治批处理模式 |
 | `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）/E2E 测试策略 |
 | `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证 |
 
