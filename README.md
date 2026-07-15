@@ -90,6 +90,7 @@ cd NewLife.Skills
 | `development-process` | 新建系统研发全流程：需求文档、功能清单、架构设计、迭代开发、自治批处理模式 |
 | `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）/E2E 测试策略 |
 | `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证 |
+| `xml-comment-enrichment` | XML 注释 AI 友好化刷新：分级补全 `<summary>`/`<param>`/`<returns>`/`<example>`/`<remarks>` |
 
 ### Agents（用户主动 `@` 调用）
 
@@ -100,7 +101,9 @@ cd NewLife.Skills
 | `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
 | `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
 | `code-review` | 按 NewLife 规范审查代码 |
-| `dev-loop` | 自治开发循环：选功能→实现→测试→更新清单→提交→检查点报告 |
+| `dev-loop` | 自治开发循环：选功能→实现→测试→需求对照自检→更新清单→提交→检查点报告 |
+| `doc-sync` | 代码↔文档双向同步：从代码重建文档体系，或用文档审计代码一致性 |
+| `implementation-audit` | 实现缺口审计：逐功能对照需求文档，发现未完整实现的功能并规划修复 |
 
 ### Prompts
 
