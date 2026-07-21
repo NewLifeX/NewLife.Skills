@@ -7,15 +7,33 @@
 
 ## 0. 加载标注（强制）
 
-**每次回答开头第一行**必须输出加载状态，便于用户验证哪些资产真正生效：
+**每次回答开头第一行**必须输出加载状态，便于用户验证哪些资产真正生效。
+
+### 格式规范
 
 ```
-> 已加载: instructions=[xxx,yyy], skills=[xxx], agent=xxx
+> 📋 **生效**: instructions=[xxx,yyy] | skills=[xxx] | agent=xxx
 ```
 
 - 未加载任何专用指令/技能时写 `instructions=[]`、`skills=[]`
 - 当前 agent 未指定时写 `agent=default`
+- 当用户手动选择 agent 时，agent 值显示 agent 名称，如 `agent=竞品分析`
 - 该行后空一行再开始正文，正文不得省略此标注
+- 该行必须在一行内完成，不得换行
+
+### 示例
+
+```
+> 📋 **生效**: instructions=[xcode,cube,development] | skills=[cube-mvc-backend,xcode-data-modeling] | agent=default
+
+正文开始...
+```
+
+```
+> 📋 **生效**: instructions=[] | skills=[] | agent=竞品分析
+
+正文开始...
+```
 
 ---
 
@@ -28,6 +46,25 @@
 | XCode/实体生成/Model.xml/数据库 CRUD/`NewLife.XCode`/`*.xcode.xml`/项目名含 `.Data`/`XCode.*` 命名空间/修改任意 `.xml` 模型文件 | `xcode.instructions.md` |
 | Cube/魔方/Web开发/后台管理/`NewLife.Cube` 引用/`NewLife.Cube.*` 命名空间/EntityController/Area/区域控制器 | `cube.instructions.md` |
 | 新建系统/新建项目/新增模块/需求整理/需求文档/需求分析/架构设计/技术方案/功能拆分/任务分解/迭代开发/PRD/做一个系统/做一个平台/批量开发/自治模式/全部搞完/接着做 | `development.instructions.md` |
+
+---
+
+### 1.5 Agent 速查表（用户手动选择）
+
+以下 Agent 可从 Copilot Chat 窗口右上角下拉菜单手动选择，每个 agent 专用于一类任务：
+
+| Agent 名称 | 用途 | 何时选择 |
+|-----------|------|---------|
+| **竞品分析** 🆕 | 联网搜索竞品并生成对比矩阵报告 | 新项目调研、功能规划时 |
+| **性能测试** 🆕 | 设计运行 BenchmarkDotNet 基准测试并输出性能报告 | 做性能优化前后、吞吐量分析 |
+| **开发循环** | 按功能清单自治开发：选功能→实现→测试→自检→提交 | 批量开发、"全部搞完" |
+| **文档同步** | 代码↔文档双向同步：重建或审计文档体系 | 文档缺失、检查一致性 |
+| **实现审计** | 需求 vs 实现差距分析，发现缺口并规划修复 | 审计实现完整性 |
+| **项目初始化** | 使用 NewLife.Templates 生成项目脚手架 | 新建项目时 |
+| **发版准备** | 生成 ChangeLog、更新版本号、准备发版 | 月度发版时 |
+| **代码审查** | 按 NewLife 编码规范审查代码质量 | PR 审查、代码质量检查 |
+
+> 选择 agent 后，在聊天输入框中输入对应触发词即可启动。agent 模式下加载标注的 `agent=` 会显示当前 agent 名称。
 
 ---
 
@@ -336,7 +373,7 @@ project-init ──► 产出项目骨架 + 初始文档
 | 需求文档新增功能 | 需求文档变更 | 用户/任意 agent | doc-sync（审计模式） | 新增需求项列表 → 触发拆分检查点 |
 | 功能清单全部完成 | dev-loop 最终提交 | dev-loop | implementation-audit | 完整功能清单 |
 | 新项目初始化 | 用户触发 | project-init | doc-sync（重建模式） | 项目骨架 + .csproj 信息 |
-| 竞品分析产出新功能 | competitive-analysis skill 完成 | 用户 | dev-loop（遴选模式） | 候选功能列表 |
+| 竞品分析产出新功能 | 竞品分析 agent 完成 | 用户 | dev-loop（遴选模式） | 候选功能列表 |
 
 ### 12.3 共享状态
 
