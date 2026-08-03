@@ -173,18 +173,20 @@ public class UserServiceTests : IDisposable
 
 ## E2E 测试
 
+> **详细标准见 `e2e-testing` 技能**：Playwright 项目搭建、Cube 登录会话复用、标准 E2E 场景清单（页面加载/列表/增删改/表单校验/空状态/错误状态/权限拦截）、失败截图与追踪、测试数据隔离。本节只保留核心原则。
+
 ### 适用场景
 
 - 前端页面交互流程验证
 - 前后端配合的完整业务流程
 - 关键用户路径回归
 
-### 实施建议
+### 核心原则
 
-- 使用 Playwright / Selenium 等浏览器自动化工具
-- 覆盖核心路径，不做穷举
+- 每个前端功能必须覆盖 `e2e-testing` 技能的标准场景清单，可适用场景缺失即视为未完成
+- 前端操作必须验证数据真正落库（刷新/重查后记录仍存在），不能只断言 UI 变化
 - 独立于单元/集成测试运行（耗时长）
-- 失败截图 + 日志辅助排查
+- 失败必须留下截图 + 追踪辅助排查
 
 ## 反模式（禁止）
 
@@ -216,7 +218,7 @@ public class UserServiceTests : IDisposable
 | 纯逻辑/算法/工具方法 | 单元测试 | 本 skill |
 | 数据库 CRUD/文件 I/O/网络通信 | 集成测试（SQLite 或真实环境） | 本 skill |
 | 文件格式/网络协议/编解码 | 竞品交叉兼容测试 | `cross-compatibility-testing` |
-| 前端交互/前后端流程 | E2E 测试 | 本 skill |
+| 前端交互/前后端流程 | E2E 测试（Playwright，标准场景清单） | `e2e-testing` |
 | 性能敏感路径 | 基准测试 | `benchmark-testing` |
 
 ## 测试执行原则

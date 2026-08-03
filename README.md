@@ -86,7 +86,8 @@ cd NewLife.Skills
 | `cube-mvc-backend` | Cube 后台管理深度定制：字段速查、视图覆盖、ConfigController |
 | `project-architecture` | 两层/三层架构选型、充血模型、Service 抽取判断 |
 | `development-process` | 新建系统研发全流程：需求文档、功能清单、架构设计、迭代开发、自治批处理模式 |
-| `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）/E2E 测试策略 |
+| `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）测试策略 |
+| `e2e-testing` | NewLife 前端/Cube 的 Playwright E2E 标准：搭建/登录会话复用/标准场景清单/失败截图/数据隔离 |
 | `benchmark-testing` | BenchmarkDotNet 基准测试：设计/运行/结果分析/性能报告 |
 | `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证 |
 | `xml-comment-enrichment` | XML 注释 AI 友好化刷新：分级补全 `<summary>`/`<param>`/`<returns>`/`<example>`/`<remarks>` |
@@ -102,7 +103,7 @@ cd NewLife.Skills
 | `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
 | `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
 | `code-review` | 按 NewLife 规范审查代码 |
-| `dev-loop` | 自治开发循环：选功能→实现→测试→需求对照自检→更新清单→提交→检查点报告 |
+| `dev-loop` | 自治开发循环：选功能→实现→测试→DoD自检+完成凭证→更新清单→提交→批次末自审→检查点报告 |
 | `doc-sync` | 代码↔文档双向同步：从代码重建文档体系，或用文档审计代码一致性 |
 | `implementation-audit` | 实现缺口审计：逐功能对照需求文档，发现未完整实现的功能并规划修复 |
 
