@@ -87,6 +87,7 @@ cd NewLife.Skills
 | `project-architecture` | 两层/三层架构选型、充血模型、Service 抽取判断 |
 | `development-process` | 新建系统研发全流程：需求文档、功能清单、架构设计、迭代开发、自治批处理模式 |
 | `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）/E2E 测试策略 |
+| `benchmark-testing` | BenchmarkDotNet 基准测试：设计/运行/结果分析/性能报告 |
 | `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证 |
 | `xml-comment-enrichment` | XML 注释 AI 友好化刷新：分级补全 `<summary>`/`<param>`/`<returns>`/`<example>`/`<remarks>` |
 
@@ -148,7 +149,7 @@ scripts/
 1. **30 天淘汰制**：连续 30 天未触发的 skill / instructions 进入删除候选
 2. **搬运型禁止**：能由 XML 注释或通用知识覆盖的内容不做 skill
 3. **单一事实源**：API 用法首选 XML 注释；架构决策首选 skill；硬约束首选全局 instructions
-4. **改动验证**：修改后在真实项目随机提一个相关问题，观察「已加载」标注是否符合预期
+4. **改动验证**：修改后在真实项目随机提一个相关问题，观察「生效」标注是否符合预期
 
 详见 [docs/三层架构与维护原则.md](docs/三层架构与维护原则.md)。
 
