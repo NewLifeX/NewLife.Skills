@@ -3,6 +3,8 @@
 **NewLife Copilot 资产统一管理库**——集中管理 NewLife 系列项目可复用的 Copilot 资产：全局指令、专用指令、技能、智能体。
 
 克隆到任意机器后执行一条脚本即可安装到 VS Code 用户数据目录，**无需在每个项目放一份 `.github`**。
+也可通过 `npx skills` 一键安装到 VS Code，**无需在每个项目放一份 `.github`**。
+也可作为 **VS Code Agent Plugin** 安装，在 VS Code 扩展搜索中直接发现和使用。
 
 ---
 
@@ -10,11 +12,11 @@
 
 资产采用**最小化策略**，分三层承担不同职责：
 
-| 层级 | 载体 | 内容 | 维护成本 |
-|---|---|---|---|
-| **Tier 1** | NuGet 包 XML 注释 | 类与成员的「如何使用」 | 跟代码一起维护 |
-| **Tier 2** | 本仓库全局 instructions | NewLife 反常规约定（硬约束） | 极低，集中维护 |
-| **Tier 3** | 本仓库 skill / agent | 流程类、架构决策类、跨组件取舍 | 仅必要项 |
+| 层级       | 载体                    | 内容                           | 维护成本       |
+| ---------- | ----------------------- | ------------------------------ | -------------- |
+| **Tier 1** | NuGet 包 XML 注释       | 类与成员的「如何使用」         | 跟代码一起维护 |
+| **Tier 2** | 本仓库全局 instructions | NewLife 反常规约定（硬约束）   | 极低，集中维护 |
+| **Tier 3** | 本仓库 skill / agent    | 流程类、架构决策类、跨组件取舍 | 仅必要项       |
 
 **判定原则**：能由 XML 注释或通用知识覆盖的，不做 skill；能由全局 instructions 承担的，不做专用 instructions。
 
@@ -22,17 +24,63 @@
 
 ## 快速开始
 
+### 安装方式对比
+
+| 方式                       | 命令                                                                 | 适用场景               |
+| -------------------------- | -------------------------------------------------------------------- | ---------------------- |
+| **VS Code Agent Plugin** 🆕 | VS Code 扩展搜索 `@agentPlugins`                                     | 推荐，VS Code 原生体验 |
+| **npx skills**             | `npx skills add https://git.newlifex.com/NewLife/NewLife.Skills.git` | 命令行快速安装         |
+| **传统克隆**               | `.\scripts\install-copilot-assets.ps1`                               | 离线环境或自定义安装   |
+
+### 方式一：VS Code Agent Plugin（推荐）
+
+1. 在 VS Code 扩展搜索视图（`Ctrl+Shift+X`）中搜索 `@agentPlugins`
+2. 找到 **NewLife Skills** 插件并安装
+3. 重启 VS Code 后即可使用全部技能和 Agent
+
+> 需要 VS Code 1.96+ 和 GitHub Copilot Chat 扩展。
+
+### 方式二：npx skills
+
+```bash
+npx skills add https://git.newlifex.com/NewLife/NewLife.Skills.git
+```
+
+或从 GitHub 安装：
+
+```bash
+npx skills add https://github.com/NewLifeX/NewLife.Skills.git
+```
+
+安装完成后**重启 VS Code**，所有项目即可使用全部资产。
+
+> 需要 [Node.js 18+](https://nodejs.org) 和 `npx`（npm 自带）。首次运行会自动下载 `skills` CLI。
+
+### 查看可用技能
+
+```bash
+npx skills add https://git.newlifex.com/NewLife/NewLife.Skills.git --list
+```
+
+### 安装单个技能
+
+```bash
+npx skills add https://git.newlifex.com/NewLife/NewLife.Skills.git --skill cube-mvc-backend
+```
+
+### 方式三：克隆安装（传统方式）
+
 ```powershell
 git clone https://github.com/NewLifeX/NewLife.Skills.git
 cd NewLife.Skills
 .\scripts\install-copilot-assets.ps1
 ```
 
-安装完成后**重启 VS Code**，所有项目即可使用全部资产。
-
 ### 更新
 
-直接重新执行 `install-copilot-assets.ps1`。脚本基于 manifest 自动同步：
+重新执行安装命令即可。`npx skills` 会自动同步最新版本。
+
+传统方式直接重新执行 `install-copilot-assets.ps1`。脚本基于 manifest 自动同步：
 
 - 新资产 → 复制
 - 仓库已删除但上次安装过的 → **自动清理**（孤儿清理）
@@ -70,49 +118,49 @@ cd NewLife.Skills
 
 存放于 [.github/instructions/](.github/instructions)：
 
-| 文件 | 触发场景 |
-|---|---|
-| `xcode.instructions.md` | XCode / Model.xml / 实体生成 / 数据库 ORM |
-| `cube.instructions.md` | Cube / 魔方 / 后台管理 / EntityController / Area 区域 |
-| `development.instructions.md` | 新建系统 / 需求分析 / 架构设计 / 迭代开发 / 自治模式 |
+| 文件                          | 触发场景                                              |
+| ----------------------------- | ----------------------------------------------------- |
+| `xcode.instructions.md`       | XCode / Model.xml / 实体生成 / 数据库 ORM             |
+| `cube.instructions.md`        | Cube / 魔方 / 后台管理 / EntityController / Area 区域 |
+| `development.instructions.md` | 新建系统 / 需求分析 / 架构设计 / 迭代开发 / 自治模式  |
 
 ### Skills（按需加载）
 
 存放于 [.github/skills/](.github/skills)，每个技能一个子目录：
 
-| 技能 | 适用场景 |
-|---|---|
-| `xcode-data-modeling` | 设计 Model.xml、xcode 命令生成实体 |
-| `cube-mvc-backend` | Cube 后台管理深度定制：字段速查、视图覆盖、ConfigController |
-| `project-architecture` | 两层/三层架构选型、充血模型、Service 抽取判断 |
-| `development-process` | 新建系统研发全流程：需求文档、功能清单、架构设计、迭代开发、自治批处理模式 |
-| `testing-strategy` | 单元测试（xUnit）/集成测试（SQLite）测试策略 |
-| `e2e-testing` | NewLife 前端/Cube 的 Playwright E2E 标准：搭建/登录会话复用/标准场景清单/失败截图/数据隔离 |
-| `benchmark-testing` | BenchmarkDotNet 基准测试：设计/运行/结果分析/性能报告 |
-| `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证 |
-| `xml-comment-enrichment` | XML 注释 AI 友好化刷新：分级补全 `<summary>`/`<param>`/`<returns>`/`<example>`/`<remarks>` |
+| 技能                          | 适用场景                                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------ |
+| `xcode-data-modeling`         | 设计 Model.xml、xcode 命令生成实体                                                         |
+| `cube-mvc-backend`            | Cube 后台管理深度定制：字段速查、视图覆盖、ConfigController                                |
+| `project-architecture`        | 两层/三层架构选型、充血模型、Service 抽取判断                                              |
+| `development-process`         | 新建系统研发全流程：需求文档、功能清单、架构设计、迭代开发、自治批处理模式                 |
+| `testing-strategy`            | 单元测试（xUnit）/集成测试（SQLite）测试策略                                               |
+| `e2e-testing`                 | NewLife 前端/Cube 的 Playwright E2E 标准：搭建/登录会话复用/标准场景清单/失败截图/数据隔离 |
+| `benchmark-testing`           | BenchmarkDotNet 基准测试：设计/运行/结果分析/性能报告                                      |
+| `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证                                       |
+| `xml-comment-enrichment`      | XML 注释 AI 友好化刷新：分级补全 `<summary>`/`<param>`/`<returns>`/`<example>`/`<remarks>` |
 
 ### Agents（用户主动 `@` 调用）
 
 存放于 [.github/agents/](.github/agents)：
 
-| Agent | 用途 |
-|---|---|
-| `competitive-analysis` | 联网搜索竞品、功能对比矩阵、输出竞品分析报告 |
-| `benchmark-testing` | BenchmarkDotNet 流程化性能测试、基准报告 |
-| `release-prep` | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes） |
-| `project-init` | 新项目初始化（NewLife 技术栈脚手架） |
-| `code-review` | 按 NewLife 规范审查代码 |
-| `dev-loop` | 自治开发循环：选功能→实现→测试→DoD自检+完成凭证→更新清单→提交→批次末自审→检查点报告 |
-| `doc-sync` | 代码↔文档双向同步：从代码重建文档体系，或用文档审计代码一致性 |
-| `implementation-audit` | 实现缺口审计：逐功能对照需求文档，发现未完整实现的功能并规划修复 |
+| Agent                  | 用途                                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `competitive-analysis` | 联网搜索竞品、功能对比矩阵、输出竞品分析报告                                        |
+| `benchmark-testing`    | BenchmarkDotNet 流程化性能测试、基准报告                                            |
+| `release-prep`         | 月度发版准备（ChangeLog/版本号/PackageReleaseNotes）                                |
+| `project-init`         | 新项目初始化（NewLife 技术栈脚手架）                                                |
+| `code-review`          | 按 NewLife 规范审查代码                                                             |
+| `dev-loop`             | 自治开发循环：选功能→实现→测试→DoD自检+完成凭证→更新清单→提交→批次末自审→检查点报告 |
+| `doc-sync`             | 代码↔文档双向同步：从代码重建文档体系，或用文档审计代码一致性                       |
+| `implementation-audit` | 实现缺口审计：逐功能对照需求文档，发现未完整实现的功能并规划修复                    |
 
 ### Prompts
 
 存放于 [.github/prompts/](.github/prompts)：
 
-| 文件 | 用途 |
-|---|---|
+| 文件                   | 用途                               |
+| ---------------------- | ---------------------------------- |
 | `doc-writer.prompt.md` | 为 C# 代码生成高质量 Markdown 文档 |
 
 ---
@@ -126,6 +174,7 @@ cd NewLife.Skills
   skills/                   # 技能（按需加载）
   agents/                   # 智能体（@ 调用）
   prompts/                  # 提示词模板
+  plugin.json               # VS Code Agent Plugin 清单
 docs/                       # 维护原则与治理文档
 scripts/
   install-copilot-assets.ps1
@@ -137,11 +186,11 @@ scripts/
 
 `install-copilot-assets.ps1` 将资产复制到：
 
-| 资产 | 目标 |
-|---|---|
-| Skills (`<name>/SKILL.md`) | `%USERPROFILE%\.copilot\skills\` |
-| Instructions / Prompts / Agents | `%APPDATA%\Code\User\prompts\` |
-| 全局指令 | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
+| 资产                            | 目标                                                         |
+| ------------------------------- | ------------------------------------------------------------ |
+| Skills (`<name>/SKILL.md`)      | `%USERPROFILE%\.copilot\skills\`                             |
+| Instructions / Prompts / Agents | `%APPDATA%\Code\User\prompts\`                               |
+| 全局指令                        | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
 
 ---
 
