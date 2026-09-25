@@ -132,7 +132,7 @@ cd NewLife.Skills
 | ----------------------------- | ------------------------------------------------------------------------------------------ |
 | `xcode-data-modeling`         | 设计 Model.xml、xcode 命令生成实体                                                         |
 | `cube-mvc-backend`            | Cube 后台管理深度定制：字段速查、视图覆盖、ConfigController                                |
-| `project-architecture`        | 两层/三层架构选型、充血模型、Service 抽取判断                                              |
+| `project-architecture`        | 两层/三层架构选型、充血模型、Service 抽取判断、简单优先（约 90% 覆盖）与扩展设计                                              |
 | `development-process`         | 新建系统研发全流程：需求文档、功能清单、架构设计、迭代开发、自治批处理模式                 |
 | `testing-strategy`            | 单元测试（xUnit）/集成测试（SQLite）测试策略                                               |
 | `e2e-testing`                 | NewLife 前端/Cube 的 Playwright E2E 标准：搭建/登录会话复用/标准场景清单/失败截图/数据隔离 |
