@@ -82,9 +82,9 @@ cd NewLife.Skills
 
 传统方式直接重新执行 `install-copilot-assets.ps1`。脚本基于 manifest 自动同步：
 
-- 新资产 → 复制
+- 新资产 → 复制到 `%USERPROFILE%\.copilot\`
 - 仓库已删除但上次安装过的 → **自动清理**（孤儿清理）
-- 不会触碰 manifest 之外的文件
+- 旧位置（`%APPDATA%\Code\User\prompts`）的同名副本 → **自动迁移清理**（加 `-KeepLegacy` 保留）
 
 ### 首次从旧脚本迁移
 
@@ -97,6 +97,8 @@ cd NewLife.Skills
 # 确认后执行
 .\scripts\install-copilot-assets.ps1 -AssumeAllOrphans
 ```
+
+> 旧版脚本把 Instructions / Agents 装在 `%APPDATA%\Code\User\prompts\`，该位置 Agent Host 会话不再读取；新脚本统一装到 `%USERPROFILE%\.copilot\`。
 
 ### 卸载
 
@@ -139,6 +141,7 @@ cd NewLife.Skills
 | `benchmark-testing`           | BenchmarkDotNet 基准测试：设计/运行/结果分析/性能报告                                      |
 | `cross-compatibility-testing` | 竞品交叉兼容测试：文件格式/网络协议/编解码多模式验证                                       |
 | `xml-comment-enrichment`      | XML 注释 AI 友好化刷新：分级补全 `<summary>`/`<param>`/`<returns>`/`<example>`/`<remarks>` |
+| `doc-writer`                  | 为 C# 代码生成高质量 Markdown 文档（frontmatter/概述/快速开始/API 表格/最佳实践）          |
 
 ### Agents（用户主动 `@` 调用）
 
@@ -155,14 +158,6 @@ cd NewLife.Skills
 | `doc-sync`             | 代码↔文档双向同步：从代码重建文档体系，或用文档审计代码一致性                       |
 | `implementation-audit` | 实现缺口审计：逐功能对照需求文档，发现未完整实现的功能并规划修复                    |
 
-### Prompts
-
-存放于 [.github/prompts/](.github/prompts)：
-
-| 文件                   | 用途                               |
-| ---------------------- | ---------------------------------- |
-| `doc-writer.prompt.md` | 为 C# 代码生成高质量 Markdown 文档 |
-
 ---
 
 ## 仓库结构
@@ -173,7 +168,6 @@ cd NewLife.Skills
   instructions/             # 专用指令（关键词触发）
   skills/                   # 技能（按需加载）
   agents/                   # 智能体（@ 调用）
-  prompts/                  # 提示词模板
   plugin.json               # VS Code Agent Plugin 清单
 docs/                       # 维护原则与治理文档
 scripts/
@@ -184,13 +178,16 @@ scripts/
 
 ## 安装路径
 
-`install-copilot-assets.ps1` 将资产复制到：
+`install-copilot-assets.ps1` 将资产复制到 Copilot 官方用户目录 `%USERPROFILE%\.copilot\`：
 
-| 资产                            | 目标                                                         |
-| ------------------------------- | ------------------------------------------------------------ |
-| Skills (`<name>/SKILL.md`)      | `%USERPROFILE%\.copilot\skills\`                             |
-| Instructions / Prompts / Agents | `%APPDATA%\Code\User\prompts\`                               |
-| 全局指令                        | `%APPDATA%\Code\User\prompts\newlife-global.instructions.md` |
+| 资产                       | 目标                                                              |
+| -------------------------- | ----------------------------------------------------------------- |
+| Skills (`<name>/SKILL.md`) | `%USERPROFILE%\.copilot\skills\`                                  |
+| Instructions               | `%USERPROFILE%\.copilot\instructions\`                            |
+| Agents                     | `%USERPROFILE%\.copilot\agents\`                                  |
+| 全局指令                   | `%USERPROFILE%\.copilot\instructions\newlife-global.instructions.md` |
+
+> Agent Host 会话（Session Target 为 Copilot）只读取 Agent Host 的用户目录，不再读取 VS Code 配置目录（`%APPDATA%\Code\User\prompts`）。从旧版脚本升级时会自动清理旧位置同名副本（含已废弃的 `*.prompt.md`），加 `-KeepLegacy` 可保留。
 
 ---
 

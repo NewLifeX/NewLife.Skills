@@ -39,7 +39,7 @@
 
 ## 1. 专用指令（前置检查，命中即加载）
 
-开始任务前，将用户请求与下表关键词逐行匹配。**命中则立即用 `read_file` 读取 `.github/instructions/{指令文件}`**。未命中则跳过。
+开始任务前，将用户请求与下表关键词逐行匹配。**命中则立即用 `read/readFile` 读取 `.github/instructions/{指令文件}`**。未命中则跳过。
 
 | 触发关键词 | 指令文件 |
 |---|---|
@@ -114,8 +114,8 @@ AI 应充分发挥才智思考更好的架构方案。不要停留在"用户说�
 
 当用户提到某个 NewLife 类型（如 `CsvFile` / `ApiHttpClient` / `MemoryCache` / `TimerX` / `XCode.Entity` 等），或代码中需要使用某个 NewLife 类型而你**不确定其用法**时，**必须按以下顺序查询，禁止凭印象编造 API**：
 
-1. **优先查 XML 注释**：用 `vscode_listCodeUsages` 或 `grep_search` 在工作区或 NuGet 包缓存（`%USERPROFILE%\.nuget\packages\<包名>\<版本>\lib\<tfm>\*.xml`）定位类型，读取其 `<summary>` / `<remarks>` / `<example>`
-2. **次选搜索源码**：若工作区包含对应 NewLife 仓库（如 `D:\X\NewLife.Core`），直接 `grep_search` 类型名定位源码
+1. **优先查 XML 注释**：用 `search/usages`（符号引用/实现定位）或 `search/textSearch`（全文检索）在工作区或 NuGet 包缓存（`%USERPROFILE%\.nuget\packages\<包名>\<版本>\lib\<tfm>\*.xml`）定位类型，读取其 `<summary>` / `<remarks>` / `<example>`
+2. **次选搜索源码**：若工作区包含对应 NewLife 仓库（如 `D:\X\NewLife.Core`），直接用 `search/textSearch` 定位源码
 3. **再次官方文档**：访问 https://newlifex.com 或 GitHub 仓库 README
 4. **最后才加载 skill**：仅当上述都不足以回答时（一般是流程/架构问题），考虑加载相关 skill
 
@@ -440,7 +440,7 @@ project-init ──► 产出项目骨架 + 初始文档
 
 ## 13. 资产清单与维护
 
-完整的 skills / agents / instructions / prompts 清单见仓库 README.md；资产维护原则（三层架构、搬运型禁止、30 天淘汰制、资产维护流程）见 docs/三层架构与维护原则.md。本文件只保留两条直接驱动 AI 行为的原则：
+完整的 skills / agents / instructions 清单见仓库 README.md；资产维护原则（三层架构、搬运型禁止、30 天淘汰制、资产维护流程）见 docs/三层架构与维护原则.md。本文件只保留两条直接驱动 AI 行为的原则：
 
 - **单一事实源**：API 用法首选 XML 注释；架构决策首选 skill；硬约束首选本文件
 - **改动验证**：修改本文件或 instructions 后，在真实项目随机提一个相关问题，观察加载标注是否符合预期

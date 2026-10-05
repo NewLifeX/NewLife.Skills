@@ -3,13 +3,16 @@
     Verify NewLife.Skills asset consistency.
 
 .DESCRIPTION
-    Scans .github/{instructions,skills,agents,prompts} and the global instruction file,
+    Scans .github/{instructions,skills,agents} and the global instruction file,
     then validates:
       1. Every asset has a valid YAML frontmatter with required fields (name/description).
       2. Each skill folder name matches its `name` field.
       3. README.md asset tables match disk in BOTH directions:
            - every disk asset is listed in README (no forgotten registration);
            - every README-listed asset exists on disk (no stale/phantom entry).
+
+    Also flags legacy .github/prompts/*.prompt.md files: prompt files are deprecated
+    for Agent Host sessions and must be migrated to skills.
 
     All files are read as UTF-8 (no BOM) via .NET to avoid PowerShell's default GBK
     corruption on Chinese content. The script NEVER modifies any file.
@@ -59,7 +62,7 @@ $readmePath = Join-Path $RepoRoot "README.md"
 $skillsDir  = Join-Path $githubDir "skills"
 $instrDir   = Join-Path $githubDir "instructions"
 $agentsDir  = Join-Path $githubDir "agents"
-$promptsDir = Join-Path $githubDir "prompts"
+$legacyPromptsDir = Join-Path $githubDir "prompts"
 
 # Identifiers a README table cell may legitimately reference.
 $diskIds = [System.Collections.Generic.HashSet[String]]::new()
@@ -103,19 +106,10 @@ foreach ($f in (Get-ChildItem -Path $agentsDir -Filter "*.agent.md")) {
     if ([String]::IsNullOrWhiteSpace($desc)) { $problems.Add("Agent missing 'description': $($f.Name)") }
 }
 
-# ── Prompts ───────────────────────────────────────────────────────────────────
-$promptCount = 0
-if (Test-Path $promptsDir) {
-    foreach ($f in (Get-ChildItem -Path $promptsDir -Filter "*.prompt.md")) {
-        $promptCount++
-        $shortName = $f.Name -replace '\.prompt\.md$', ''
-        [void]$diskIds.Add($f.Name)
-        [void]$diskIds.Add($shortName)
-        $mustList.Add($f.Name)
-        $fm = GetFrontmatter (ReadText $f.FullName)
-        if ($null -eq $fm) { $problems.Add("Prompt missing frontmatter: $($f.Name)"); continue }
-        $desc = GetField $fm "description"
-        if ([String]::IsNullOrWhiteSpace($desc)) { $problems.Add("Prompt missing 'description': $($f.Name)") }
+# ── Legacy prompts (prompt files are deprecated for Agent Host; migrate to skills) ──
+if (Test-Path $legacyPromptsDir) {
+    foreach ($f in (Get-ChildItem -Path $legacyPromptsDir -Filter "*.prompt.md")) {
+        $problems.Add("Legacy prompt file (migrate to a skill): $($f.Name)")
     }
 }
 
@@ -141,7 +135,7 @@ $agentCount = (Get-ChildItem -Path $agentsDir -Filter "*.agent.md").Count
 
 Write-Host ""
 Write-Host "NewLife.Skills asset verification" -ForegroundColor Cyan
-Write-Host ("  skills={0}  instructions={1}  agents={2}  prompts={3}" -f $skillCount, $instrCount, $agentCount, $promptCount)
+Write-Host ("  skills={0}  instructions={1}  agents={2}" -f $skillCount, $instrCount, $agentCount)
 
 if ($problems.Count -eq 0) {
     Write-Host "  OK: all assets consistent." -ForegroundColor Green

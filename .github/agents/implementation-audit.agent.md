@@ -117,7 +117,7 @@ tools: [read, search, edit, execute, todo]
 🔍审计: 3个public方法缺<param>，1个缺<returns>。文件: Message.cs
 ```
 
-**⚠️ 必须用 `replace_string_in_file` 或 `multi_replace_string_in_file` 实际修改文件，禁止仅内联输出。**
+**⚠️ 必须用 `edit/editFiles` 实际修改文件，禁止仅内联输出。**
 
 #### 2.2 父需求完整性审计
 
@@ -262,5 +262,5 @@ tools: [read, search, edit, execute, todo]
 | 5 | **不修改需求文档**：审计只评价实现质量，不反向修改需求（那是 doc-sync 的职责） |
 | 6 | **审计结果直接写入功能清单**：修正三列状态 + 说明列写 `🔍审计:` 前缀的缺口描述 |
 | 7 | **不创建额外文档**：功能清单已承载所有审计信息，禁止创建 `Doc/审计报告.md` 等额外文件 |
-| 8 | **必须实际修改文件**：用 `replace_string_in_file` 写入功能清单，禁止仅内联输出 |
+| 8 | **必须实际修改文件**：用 `edit/editFiles` 写入功能清单，禁止仅内联输出 |
 | 9 | **缺口 ≤5 直接提示修复，>5 提示审阅**：少量缺口快速闭环，大量缺口给用户缓冲空间 |
