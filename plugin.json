@@ -1,6 +1,6 @@
 {
   "name": "newlife-skills",
-  "description": "NewLife 技术栈的 Copilot 智能体插件，包含 NewLife.XCode 数据建模、NewLife.Cube 后台管理、E2E 测试、性能基准测试等 10 个技能和 10 个自定义 Agent",
+  "description": "NewLife 技术栈的 Copilot 智能体插件，包含 NewLife.XCode 数据建模、NewLife.Cube 后台管理、E2E 测试、性能基准测试等 10 个技能和 9 个自定义 Agent",
   "version": "1.0.0",
   "keywords": [
     "newlife",
