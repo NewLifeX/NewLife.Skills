@@ -94,7 +94,7 @@ cd NewLife.Skills
 
 - 新资产 → 复制到 `%USERPROFILE%\.copilot\`
 - 仓库已删除但上次安装过的 → **自动清理**（孤儿清理）
-- 旧位置（`%APPDATA%\Code\User\prompts`）的同名副本 → **自动迁移清理**（加 `-KeepLegacy` 保留）
+- 旧位置（`%APPDATA%\Code\User\prompts`、`%APPDATA%\Code\User\chatmodes`）的同名副本 → **自动迁移清理**（加 `-KeepLegacy` 保留）
 
 ### 首次从旧脚本迁移
 
@@ -108,7 +108,7 @@ cd NewLife.Skills
 .\scripts\install-copilot-assets.ps1 -AssumeAllOrphans
 ```
 
-> 旧版脚本把 Instructions / Agents 装在 `%APPDATA%\Code\User\prompts\`，该位置 Agent Host 会话不再读取；新脚本统一装到 `%USERPROFILE%\.copilot\`。
+> 旧版脚本把 Instructions / Agents 装在 `%APPDATA%\Code\User\prompts\`（更早的初版脚本把 Agents 装在 `%APPDATA%\Code\User\chatmodes\`），这些位置 Agent Host 会话不再读取；新脚本统一装到 `%USERPROFILE%\.copilot\`。
 
 ### 卸载
 
@@ -209,7 +209,7 @@ scripts/
 | Agents                     | `%USERPROFILE%\.copilot\agents\`                                  |
 | 全局指令                   | `%USERPROFILE%\.copilot\instructions\newlife-global.instructions.md` |
 
-> Agent Host 会话（Session Target 为 Copilot）只读取 Agent Host 的用户目录，不再读取 VS Code 配置目录（`%APPDATA%\Code\User\prompts`）。从旧版脚本升级时会自动清理旧位置同名副本（含已废弃的 `*.prompt.md`），加 `-KeepLegacy` 可保留。
+> Agent Host 会话（Session Target 为 Copilot）只读取 Agent Host 的用户目录，不再读取 VS Code 配置目录（`%APPDATA%\Code\User\prompts`、`%APPDATA%\Code\User\chatmodes`）。从旧版脚本升级时会自动清理旧位置同名副本（含已废弃的 `*.prompt.md`），加 `-KeepLegacy` 可保留。
 
 ---
 

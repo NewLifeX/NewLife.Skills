@@ -11,8 +11,9 @@
 
     通过 manifest 文件 (~/.copilot/newlife-skills-manifest.json) 跟踪本工具安装过的资产，
     再次执行安装时会**自动删除**仓库中已不存在但上次安装过的资产（孤儿清理）。
-    从旧版脚本升级（资产装在 %APPDATA%\Code\User\prompts）时，安装后自动清理旧位置的
-    同名副本（含已废弃的 *.prompt.md）；加 -KeepLegacy 可保留旧位置文件。
+    从旧版脚本升级（资产装在 %APPDATA%\Code\User\prompts，更早的初版脚本把 Agents 装在
+    %APPDATA%\Code\User\chatmodes）时，安装后自动清理旧位置的同名副本（含已废弃的
+    *.prompt.md）；加 -KeepLegacy 可保留旧位置文件。
     不会触碰仓库资产清单与 manifest 之外的文件，保证用户自有资产安全。
 
     支持平台：Win10 / Win11 + VS Code + GitHub Copilot Chat
@@ -30,12 +31,12 @@
     安装时不清理孤儿资产（仅做覆盖式更新）。一般不需要。
 
 .PARAMETER KeepLegacy
-    保留旧位置（%APPDATA%\Code\User\prompts）下的同名资产副本，不做迁移清理。
+    保留旧位置（%APPDATA%\Code\User\prompts、%APPDATA%\Code\User\chatmodes）下的同名资产副本，不做迁移清理。
 
 .PARAMETER AssumeAllOrphans
-    首次升级专用：manifest 不存在时，把目标目录中所有符合本工具命名规则的资产
-    （skills/ 子目录、*.instructions.md、*.agent.md、*.prompt.md）视为上次安装过，
-    本次仓库中不存在的都会被清理。
+    首次升级专用：manifest 不存在时，把目标目录（含旧位置 prompts / chatmodes）中所有符合
+    本工具命名规则的资产（skills/ 子目录、*.instructions.md、*.agent.md、*.prompt.md）视为
+    上次安装过，本次仓库中不存在的都会被清理。
     ⚠ 会误删同名但非本工具安装的文件，请先加 -WhatIf 预览。
 
 .EXAMPLE
@@ -76,7 +77,10 @@ $agentsDst       = Join-Path $copilotHome "agents"
 $manifestPath    = Join-Path $copilotHome "newlife-skills-manifest.json"
 
 # 旧版安装位置（迁移清理用），不再主动创建
+#   prompts   —— 中期版本位置（Instructions / Agents）
+#   chatmodes —— 初版位置（仅 Agents）
 $legacyDst       = Join-Path (Join-Path $env:APPDATA "Code\User") "prompts"
+$chatmodesDst    = Join-Path (Join-Path $env:APPDATA "Code\User") "chatmodes"
 $skillsDstOld    = Join-Path $legacyDst "skills"
 $manifestPathOld = Join-Path $legacyDst "newlife-skills-manifest.json"
 
@@ -129,7 +133,7 @@ function WriteManifest ([String[]]$Assets) {
 # 资产相对路径约定：
 #   - skill 文件夹："skills/<name>"              → ~/.copilot/skills/<name>（旧：prompts\skills\）
 #   - 指令文件：    "<filename>.instructions.md" → ~/.copilot/instructions/（旧：prompts\）
-#   - Agent 文件：  "<filename>.agent.md"        → ~/.copilot/agents/（旧：prompts\）
+#   - Agent 文件：  "<filename>.agent.md"        → ~/.copilot/agents/（旧：prompts\，初版：chatmodes\）
 #   - 旧版提示文件："<filename>.prompt.md"       → 仅存在于旧位置 prompts\
 function GetAssetLocations ([String]$RelPath) {
     $list = New-Object System.Collections.Generic.List[String]
@@ -145,6 +149,7 @@ function GetAssetLocations ([String]$RelPath) {
     elseif ($RelPath.EndsWith(".agent.md", [StringComparison]::OrdinalIgnoreCase)) {
         $list.Add((Join-Path $agentsDst $RelPath))
         $list.Add((Join-Path $legacyDst $RelPath))
+        $list.Add((Join-Path $chatmodesDst $RelPath))
     }
     else {
         $list.Add((Join-Path $legacyDst $RelPath))
@@ -163,16 +168,27 @@ function RemoveAsset ([String]$RelPath) {
     return $removed
 }
 
-# 迁移清理：新位置已就位后，删除旧位置下的同名副本
+# 迁移清理：新位置已就位后，删除旧位置下的同名副本（Agents 同时清理初版 chatmodes 位置）
 function RemoveLegacyCopy ([String]$RelPath) {
-    $full = Join-Path $legacyDst $RelPath
+    $olds = New-Object System.Collections.Generic.List[String]
     if ($RelPath.StartsWith("skills/", [StringComparison]::OrdinalIgnoreCase)) {
-        $full = Join-Path $skillsDstOld ($RelPath.Substring(7))
+        $olds.Add((Join-Path $skillsDstOld ($RelPath.Substring(7))))
     }
-    if (-not (Test-Path $full)) { return $false }
-    if ($WhatIf) { return $true }
-    Remove-Item -Path $full -Recurse -Force
-    return $true
+    elseif ($RelPath.EndsWith(".agent.md", [StringComparison]::OrdinalIgnoreCase)) {
+        $olds.Add((Join-Path $legacyDst $RelPath))
+        $olds.Add((Join-Path $chatmodesDst $RelPath))
+    }
+    else {
+        $olds.Add((Join-Path $legacyDst $RelPath))
+    }
+    $removed = $false
+    foreach ($full in $olds) {
+        if (Test-Path $full) {
+            if (-not $WhatIf) { Remove-Item -Path $full -Recurse -Force }
+            $removed = $true
+        }
+    }
+    return $removed
 }
 
 function CopyFileAsset ([String]$SrcFile, [String]$DstDir) {
@@ -207,9 +223,9 @@ if (-not $Uninstall -and -not (Test-Path $githubDir)) {
 EnsureDir $skillsDst
 EnsureDir $instrDst
 EnsureDir $agentsDst
-# 迁移模式：存在旧 manifest，或显式 -AssumeAllOrphans 时，安装后清理旧位置副本
-$migrateLegacy = (-not $KeepLegacy) -and ($AssumeAllOrphans -or (Test-Path $manifestPathOld))
-if ($migrateLegacy -and (Test-Path $legacyDst)) {
+# 迁移模式：存在旧 manifest、初版 chatmodes 目录，或显式 -AssumeAllOrphans 时，安装后清理旧位置副本
+$migrateLegacy = (-not $KeepLegacy) -and ($AssumeAllOrphans -or (Test-Path $manifestPathOld) -or (Test-Path $chatmodesDst))
+if ($migrateLegacy -and ((Test-Path $legacyDst) -or (Test-Path $chatmodesDst))) {
     Write-Host "  ⚠ 检测到旧版安装位置，安装后将清理旧位置同名副本" -ForegroundColor Yellow
 }
 
@@ -282,12 +298,15 @@ if ($AssumeAllOrphans) {
     if (Test-Path $skillsDstOld) {
         Get-ChildItem -Path $skillsDstOld -Directory | ForEach-Object { $virtual.Add("skills/$($_.Name)") }
     }
-    # 旧位置文件（含已废弃的 *.prompt.md）；不扫描 ~/.copilot/agents、~/.copilot/instructions，
-    # 避免误把用户自有的 Agent / 指令文件当作本工具安装过的资产
+    # 旧位置文件（prompts 含已废弃的 *.prompt.md；chatmodes 为初版 Agents 位置）；不扫描
+    # ~/.copilot/agents、~/.copilot/instructions，避免误把用户自有的 Agent / 指令文件当作本工具安装过的资产
     if (Test-Path $legacyDst) {
         Get-ChildItem -Path $legacyDst -Filter "*.instructions.md" -File | ForEach-Object { $virtual.Add($_.Name) }
         Get-ChildItem -Path $legacyDst -Filter "*.agent.md" -File | ForEach-Object { $virtual.Add($_.Name) }
         Get-ChildItem -Path $legacyDst -Filter "*.prompt.md" -File | ForEach-Object { $virtual.Add($_.Name) }
+    }
+    if (Test-Path $chatmodesDst) {
+        Get-ChildItem -Path $chatmodesDst -Filter "*.agent.md" -File | ForEach-Object { $virtual.Add($_.Name) }
     }
     $oldAssets = @($virtual | Select-Object -Unique)
     Write-Host "    发现 $($oldAssets.Count) 项候选资产" -ForegroundColor DarkGray
@@ -357,7 +376,7 @@ if (Test-Path $globalInstrSrc) {
 }
 
 # ── 旧位置迁移清理 ────────────────────────────────────────────────────────────
-if ($migrateLegacy -and (Test-Path $legacyDst)) {
+if ($migrateLegacy -and ((Test-Path $legacyDst) -or (Test-Path $chatmodesDst))) {
     foreach ($a in $newAssets) {
         if (RemoveLegacyCopy $a) { $legacyCleaned++ }
     }
@@ -367,6 +386,10 @@ if ($migrateLegacy -and (Test-Path $legacyDst)) {
     # 旧技能目录为空则删除
     if ((Test-Path $skillsDstOld) -and -not $WhatIf -and @(Get-ChildItem -Path $skillsDstOld -ErrorAction SilentlyContinue).Count -eq 0) {
         Remove-Item -Path $skillsDstOld -Force -ErrorAction SilentlyContinue
+    }
+    # 初版 chatmodes 目录为空则删除
+    if ((Test-Path $chatmodesDst) -and -not $WhatIf -and @(Get-ChildItem -Path $chatmodesDst -ErrorAction SilentlyContinue).Count -eq 0) {
+        Remove-Item -Path $chatmodesDst -Force -ErrorAction SilentlyContinue
     }
 }
 
