@@ -128,6 +128,33 @@ foreach ($n in $readmeNames) {
     if (-not $diskIds.Contains($n)) { $problems.Add("README lists non-existent asset: $n") }
 }
 
+# ── Agent quick table cross-check (copilot-instructions.md §1.5) ──────────────
+$instrPath = Join-Path $githubDir "copilot-instructions.md"
+if (-not (Test-Path $instrPath)) {
+    $problems.Add("copilot-instructions.md not found")
+} else {
+    $section = [regex]::Match((ReadText $instrPath), '(?s)### 1\.5.*?\r?\n---')
+    if (-not $section.Success) {
+        $problems.Add("copilot-instructions §1.5 (Agent quick table) section not found")
+    } else {
+        $listedNames = [System.Collections.Generic.List[String]]::new()
+        foreach ($m in [regex]::Matches($section.Value, '\*\*([^*\r\n]+?)\*\*')) {
+            [void]$listedNames.Add($m.Groups[1].Value.Trim())
+        }
+        $agentNames = [System.Collections.Generic.List[String]]::new()
+        foreach ($f in (Get-ChildItem -Path $agentsDir -Filter "*.agent.md")) {
+            $nm = GetField (GetFrontmatter (ReadText $f.FullName)) "name"
+            if (-not [String]::IsNullOrWhiteSpace($nm)) { [void]$agentNames.Add($nm) }
+        }
+        foreach ($nm in $agentNames) {
+            if ($listedNames -notcontains $nm) { $problems.Add("Agent missing from copilot-instructions §1.5 quick table: $nm") }
+        }
+        foreach ($nm in $listedNames) {
+            if ($agentNames -notcontains $nm) { $problems.Add("copilot-instructions §1.5 lists non-existent agent: $nm") }
+        }
+    }
+}
+
 # ── Report ────────────────────────────────────────────────────────────────────
 $skillCount = (Get-ChildItem -Path $skillsDir -Directory).Count
 $instrCount = (Get-ChildItem -Path $instrDir -Filter "*.instructions.md").Count
