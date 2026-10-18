@@ -1,5 +1,15 @@
 # NewLife.Skills
 
+
+![GitHub License](https://img.shields.io/github/license/NewLifeX/NewLife.Skills?logo=github)
+[![test](https://github.com/NewLifeX/NewLife.Skills/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/NewLifeX/NewLife.Skills/actions/workflows/test.yml)
+![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
+[![contributors](https://img.shields.io/github/contributors/NewLifeX/NewLife.Skills?logo=github)](https://github.com/NewLifeX/NewLife.Skills/graphs/contributors)
+
+<!-- lang:start -->
+🌐 [繁體中文](README.zh-TW.md) | [English](README.en.md) | [Español](README.es.md) | [Deutsch](README.de.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Português](README.pt.md) | [Русский](README.ru.md) | [한국어](README.ko.md) | [العربية](README.ar.md)
+<!-- lang:end -->
+
 **NewLife Copilot 资产统一管理库**——集中管理 NewLife 系列项目可复用的 Copilot 资产：全局指令、专用指令、技能、智能体。
 
 克隆到任意机器后执行一条脚本即可安装到 VS Code 用户数据目录，**无需在每个项目放一份 `.github`**。
