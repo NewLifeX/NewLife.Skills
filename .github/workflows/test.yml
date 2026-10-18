@@ -1,0 +1,41 @@
+name: test
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: validate assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Validate JSON assets
+      shell: pwsh
+      run: |
+        $failed = $false
+        Get-ChildItem -Path . -Recurse -Filter *.json | Where-Object { $_.FullName -notmatch '[\\/](\.git|node_modules)[\\/]' } | ForEach-Object {
+          try { Get-Content $_.FullName -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null }
+          catch { Write-Host "Invalid JSON: $($_.FullName)"; $failed = $true }
+        }
+        if ($failed) { exit 1 }
+    - name: Validate YAML front matter
+      shell: pwsh
+      run: |
+        $failed = $false
+        Get-ChildItem -Path . -Recurse -Filter *.md | Where-Object { $_.FullName -notmatch '[\\/](\.git|node_modules)[\\/]' } | ForEach-Object {
+          $text = Get-Content $_.FullName -Raw -Encoding UTF8
+          if ($text.StartsWith('---')) {
+            $end = $text.IndexOf("`n---", 3)
+            if ($end -lt 0) { Write-Host "Unterminated front matter: $($_.FullName)"; $failed = $true }
+          }
+        }
+        if ($failed) { exit 1 }
+    - name: Check README languages
+      shell: pwsh
+      run: pwsh -File ./sync-readme-languages.ps1 -Check
