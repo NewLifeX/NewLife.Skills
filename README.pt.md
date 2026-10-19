@@ -2,7 +2,6 @@
 
 ![GitHub License](https://img.shields.io/github/license/NewLifeX/NewLife.Skills?logo=github)
 [![test](https://github.com/NewLifeX/NewLife.Skills/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/NewLifeX/NewLife.Skills/actions/workflows/test.yml)
-![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 [![contributors](https://img.shields.io/github/contributors/NewLifeX/NewLife.Skills?logo=github)](https://github.com/NewLifeX/NewLife.Skills/graphs/contributors)
 
 <!-- lang:start -->
